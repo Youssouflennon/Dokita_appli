@@ -45,7 +45,6 @@ import {
   SelectValue,
 } from "../../components/components/ui/select";
 
-
 export default function PatientsTable() {
   const [isChecked, setIsChecked] = useState(false);
   const [isSwitched, setIsSwitched] = useState(false);
@@ -57,8 +56,6 @@ export default function PatientsTable() {
 
   const navigate = useNavigate();
 
-
-  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,6 +73,7 @@ export default function PatientsTable() {
   }
 
   return (
+    
     <div className="p-4 h-full">
       <Card className="mb-6">
         <CardHeader>
@@ -148,7 +146,7 @@ export default function PatientsTable() {
               />{" "}
             </PopoverTrigger>
             <PopoverContent className="">
-            <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
@@ -216,154 +214,156 @@ export default function PatientsTable() {
         </div>
       </div>
 
-      <Table className="bg-white">
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <CustomCheckbox
-                label=""
-                checked={isChecked}
-                onChange={(e) => setIsChecked(e.target.checked)}
-              />{" "}
-            </TableHead>
-            <TableHead>Nom complet</TableHead>
-            <TableHead>Adresse Email</TableHead>
-            <TableHead>Numéro</TableHead>
-            <TableHead>Adresse</TableHead>
-            <TableHead>Date d’insc.</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <TableRow
-              key={i}
-              className="cursor-pointer"
-              onClick={() => {
-                navigate("/detail_patient");
-              }}
-            >
-              <TableCell>
+      <div className="w-full overflow-x-auto">
+        <Table className="min-w-[600px]  bg-white">
+          <TableHeader>
+            <TableRow>
+              <TableHead>
                 <CustomCheckbox
                   label=""
                   checked={isChecked}
                   onChange={(e) => setIsChecked(e.target.checked)}
                 />{" "}
-              </TableCell>
-              <TableCell className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src="https://i.pravatar.cc/40?img=3"
-                    alt="Avatar"
-                  />
-                  <AvatarFallback>NM</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">Nana Momo</span>
-              </TableCell>
-              <TableCell className="text-blue-600 underline">
-                darlenrobertson@gmail.com
-              </TableCell>
-              <TableCell>+237 691 234 567</TableCell>
-              <TableCell>Douala, Cameroun</TableCell>
-              <TableCell>01/02/2024</TableCell>
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <CustomSwitch
-                  label="Active"
-                  enabled={isSwitched}
-                  onChange={setIsSwitched}
-                />{" "}
-              </TableCell>
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <Popover>
-                  <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </PopoverTrigger>
-                  <PopoverContent className="p-4 w-full">
-                    <ul className="space-y-2 cursor-pointer">
-                      <li
-                        className="flex items-center gap-2 p-2 border-b last:border-none"
-                        onClick={() => {
-                          navigate("/detail_patient");
-                        }}
-                        // navigate(0);
-                      >
-                        <FaEdit
-                          className="text-gray-600 text-lg cursor-pointer"
+              </TableHead>
+              <TableHead>Nom complet</TableHead>
+              <TableHead>Adresse Email</TableHead>
+              <TableHead>Numéro</TableHead>
+              <TableHead>Adresse</TableHead>
+              <TableHead>Date d’insc.</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TableRow
+                key={i}
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate("/detail_patient");
+                }}
+              >
+                <TableCell>
+                  <CustomCheckbox
+                    label=""
+                    checked={isChecked}
+                    onChange={(e) => setIsChecked(e.target.checked)}
+                  />{" "}
+                </TableCell>
+                <TableCell className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src="https://i.pravatar.cc/40?img=3"
+                      alt="Avatar"
+                    />
+                    <AvatarFallback>NM</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">Nana Momo</span>
+                </TableCell>
+                <TableCell className="text-blue-600 underline">
+                  darlenrobertson@gmail.com
+                </TableCell>
+                <TableCell>+237 691 234 567</TableCell>
+                <TableCell>Douala, Cameroun</TableCell>
+                <TableCell>01/02/2024</TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <CustomSwitch
+                    label="Active"
+                    enabled={isSwitched}
+                    onChange={setIsSwitched}
+                  />{" "}
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Popover>
+                    <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </PopoverTrigger>
+                    <PopoverContent className="p-4 w-full">
+                      <ul className="space-y-2 cursor-pointer">
+                        <li
+                          className="flex items-center gap-2 p-2 border-b last:border-none"
+                          onClick={() => {
+                            navigate("/detail_patient");
+                          }}
+                          // navigate(0);
+                        >
+                          <FaEdit
+                            className="text-gray-600 text-lg cursor-pointer"
+                            onClick={(event) => {
+                              event.stopPropagation();
+
+                              //  handleRowClick(item.id);
+                            }}
+                          />
+                          <span className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200">
+                            Modifier
+                          </span>
+                        </li>
+
+                        <li
+                          className="flex items-center gap-2 p-2 border-b last:border-none"
                           onClick={(event) => {
                             event.stopPropagation();
 
-                            //  handleRowClick(item.id);
+                            // setSelectedUser(item.id);
+                            setIsOpen(true);
                           }}
-                        />
-                        <span className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200">
-                          Modifier
-                        </span>
-                      </li>
+                          // navigate(0);
+                        >
+                          <FaTrash className="text-red-600 text-lg cursor-pointer" />
+                          <span className="font-medium text-red-500 text-sm hover:text-red-600 transition-colors duration-200">
+                            supprimer
+                          </span>
+                        </li>
+                      </ul>
+                    </PopoverContent>
+                  </Popover>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+          <TableFooter className="bg-white">
+            <tr>
+              <td colSpan={8}>
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
+                  {/* Infos de page */}
+                  <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
 
-                      <li
-                        className="flex items-center gap-2 p-2 border-b last:border-none"
-                        onClick={(event) => {
-                          event.stopPropagation();
+                  {/* Pagination */}
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {/* Précédent */}
+                    <Button variant="outline" size="lg" disabled>
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
 
-                          // setSelectedUser(item.id);
-                          setIsOpen(true);
-                        }}
-                        // navigate(0);
-                      >
-                        <FaTrash className="text-red-600 text-lg cursor-pointer" />
-                        <span className="font-medium text-red-500 text-sm hover:text-red-600 transition-colors duration-200">
-                          supprimer
-                        </span>
-                      </li>
-                    </ul>
-                  </PopoverContent>
-                </Popover>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
+                    {/* Pages */}
+                    <Button variant="outline" size="icon">
+                      1
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      2
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      3
+                    </Button>
+                    <Button variant="outline" size="icon" disabled>
+                      …
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      34
+                    </Button>
 
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                    {/* Suivant */}
+                    <Button variant="outline" size="lg">
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
-        </TableFooter>
-      </Table>
+              </td>
+            </tr>
+          </TableFooter>
+        </Table>
+      </div>
 
       <Transition show={isOpen} as={React.Fragment}>
         <Dialog

@@ -14,6 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import useStoreOverview from "src/store/admin/overview";
 
 const data = [
   { mois: "Jan", profit: 4000 },
@@ -28,6 +29,15 @@ const data = [
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const { Overview, loadingOverview, fetchOverview, error } =
+    useStoreOverview();
+
+  useEffect(() => {
+    fetchOverview();
+  }, [fetchOverview]);
+
+  console.log("Overview", Overview);
 
   useEffect(() => {
     // Simule un chargement pendant 3 secondes
