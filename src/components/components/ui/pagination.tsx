@@ -1,83 +1,99 @@
+import React from "react";
+import { Button } from "../../components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "./button";
 
 interface PaginationProps {
-  pages: number; // total pages
+  pages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
-  rangeLimit?: number; // combien de pages visibles autour
+  rangeLimit?: number;
 }
 
-export function PaginationComponent({
+const Pagination: React.FC<PaginationProps> = ({
   pages,
   currentPage,
   onPageChange,
   rangeLimit = 3,
-}: PaginationProps) {
-  const pageNumbers = getVisiblePages(currentPage, pages, rangeLimit);
+}) => {
+  // if (pages <= 1) return null;
+
+  const getPageNumbers = () => {
+    const pagesToShow: (number | string)[] = [];
+    const leftLimit = Math.max(2, currentPage - rangeLimit);
+    const rightLimit = Math.min(pages - 1, currentPage + rangeLimit);
+
+    pagesToShow.push(1);
+
+    if (leftLimit > 2) {
+      pagesToShow.push("…");
+    }
+
+    for (let i = leftLimit; i <= rightLimit; i++) {
+      pagesToShow.push(i);
+    }
+
+    if (rightLimit < pages - 1) {
+      pagesToShow.push("…");
+    }
+
+    if (pages > 1) {
+      pagesToShow.push(pages);
+    }
+
+    return pagesToShow;
+  };
+
+  const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center gap-1 flex-wrap">
-      {/* Previous button */}
-      <Button
-        variant="outline"
-        size="icon"
-        disabled={currentPage === 1}
-        onClick={() => onPageChange(currentPage - 1)}
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </Button>
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-1 w-full">
+      <p className="text-sm text-gray-500">
+        Page {currentPage} sur {pages}
+      </p>
 
-      {/* Page numbers */}
-      {pageNumbers.map((page, i) =>
-        page === "..." ? (
-          <Button key={i} variant="ghost" size="icon" disabled>
-            …
-          </Button>
-        ) : (
-          <Button
-            key={i}
-            variant={page === currentPage ? "default" : "outline"}
-            size="icon"
-            onClick={() => onPageChange(Number(page))}
-          >
-            {page}
-          </Button>
-        )
-      )}
+      <div className="flex items-center gap-1 flex-wrap">
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
 
-      {/* Next button */}
-      <Button
-        variant="outline"
-        size="icon"
-        disabled={currentPage === pages}
-        onClick={() => onPageChange(currentPage + 1)}
-      >
-        <ChevronRight className="w-4 h-4" />
-      </Button>
+        {pageNumbers.map((num, idx) =>
+          num === "…" ? (
+            <Button key={idx} variant="outline" size="icon" disabled>
+              …
+            </Button>
+          ) : (
+            <Button
+              key={idx}
+              variant="outline"
+              size="icon"
+              onClick={() => onPageChange(num as number)}
+              className={
+                currentPage === num
+                  ? "bg-primary text-white hover:bg-primary"
+                  : ""
+              }
+            >
+              {num}
+            </Button>
+          )
+        )}
+
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={currentPage === pages}
+          onClick={() => onPageChange(currentPage + 1)}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
-}
+};
 
-function getVisiblePages(current: number, total: number, limit: number): (number | "...")[] {
-  const pages: (number | "...")[] = [];
-
-  const start = Math.max(1, current - limit);
-  const end = Math.min(total, current + limit);
-
-  if (start > 1) {
-    pages.push(1);
-    if (start > 2) pages.push("...");
-  }
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  if (end < total) {
-    if (end < total - 1) pages.push("...");
-    pages.push(total);
-  }
-
-  return pages;
-}
+export default Pagination;

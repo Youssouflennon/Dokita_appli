@@ -58,7 +58,7 @@ const AddTeamMembersModal: React.FC<AddTeamMembersModalProps> = ({
     try {
       // Faire l'appel API directement
       const token = JSON.parse(
-        localStorage.getItem("Task-Manager-auth-data") || "{}"
+        localStorage.getItem("token") || "{}"
       ).accessToken;
 
       if (!token) {

@@ -1,7 +1,7 @@
 import { Button } from "../../components/components/ui/button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEllipsisV, FaEdit, FaSearch, FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   Card,
@@ -55,25 +55,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreOneUser from "src/store/users/getOne";
+import { useToast } from "../../components/hooks/use-toast";
+import TotalLoad from "../../components/components/totalLoad";
+import useStoreUpdateUserDoc from "src/store/users/updateDoc";
 
 type FormValues = {
-  nom: string;
-  prenom: string;
-  sexe: string;
+  firstName: string;
+  lastName: string;
+  sex: string;
   email: string;
-  telephone: string;
-  adresse: string;
+  phone: string;
+  address: string;
 };
 
 const DetailDoctor = () => {
   const form = useForm<FormValues>({
     defaultValues: {
-      nom: "Nana Momo",
-      prenom: "Nana",
-      sexe: "Masculin",
-      email: "user-camer@gmail.com",
-      telephone: "+237 690 00 00 00",
-      adresse: "Yaoundé, Cameroun",
+      firstName: "",
+      lastName: "",
+      sex: "MALE",
+      email: "",
+      phone: "",
+      address: "",
     },
   });
 
@@ -88,10 +92,89 @@ const DetailDoctor = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const evaluations = [
-    { id: 1, name: "Salhe nana", note: 5, comment: "Le Dr Jenny est très professionnelle et réactive. J'ai consulté et mon problème a été résolu. 😍😍" },
-    { id: 2, name: "Salhe nana", note: 4, comment: "Le Dr Jenny est très professionnelle et réactive. J'ai consulté et mon problème a été résolu. 😍😍" },
-    { id: 3, name: "Salhe nana", note: 3, comment: "Le Dr Jenny est très professionnelle et réactive. J'ai consulté et mon problème a été résolu. 😍😍" },
+    {
+      id: 1,
+      name: "Salhe nana",
+      note: 5,
+      comment:
+        "Le Dr Jenny est très professionnelle et réactive. J'ai consulté et mon problème a été résolu. 😍😍",
+    },
+    {
+      id: 2,
+      name: "Salhe nana",
+      note: 4,
+      comment:
+        "Le Dr Jenny est très professionnelle et réactive. J'ai consulté et mon problème a été résolu. 😍😍",
+    },
+    {
+      id: 3,
+      name: "Salhe nana",
+      note: 3,
+      comment:
+        "Le Dr Jenny est très professionnelle et réactive. J'ai consulté et mon problème a été résolu. 😍😍",
+    },
   ];
+
+  const { id } = useParams();
+  const { OneUser, fetchOneUser, loadingOneUser } = useStoreOneUser();
+  const { updateUsersDoc } = useStoreUpdateUserDoc();
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (id) {
+      fetchOneUser(id);
+    }
+  }, [id, fetchOneUser]);
+
+  useEffect(() => {
+    if (OneUser) {
+      form.reset({
+        firstName: OneUser.firstName || "",
+        lastName: OneUser.lastName || "",
+        phone: OneUser.phone || "",
+        email: OneUser?.email || "",
+        sex: OneUser.sex || "MALE",
+        address: OneUser?.address || "",
+      });
+    }
+  }, [OneUser, form]);
+
+  if (loadingOneUser) {
+    return <TotalLoad />;
+  }
+
+  const onSubmit = async (data: any) => {
+    console.log("data", data);
+
+    try {
+      setLoading(true);
+
+      if (id)
+        await updateUsersDoc(id, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
+          email: data.email,
+          sex: data.sex,
+          address: data.address,
+        }); // ton action doit gérer l'envoi de FormData
+      navigate("/patients");
+      toast({
+        title: "Modification réussie",
+        description: "Bienvenue sur Dokita 🚀",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Erreur Modification",
+      });
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -102,7 +185,7 @@ const DetailDoctor = () => {
           navigate(-1);
         }}
       >
-        ← Jenny Wilson
+        ← {OneUser?.firstName}
       </h1>
 
       {/* Informations Générales */}
@@ -116,40 +199,45 @@ const DetailDoctor = () => {
               size="sm"
               onClick={() => setEditMode(true)}
             >
-              {" "}
               <FaEdit className="mr-2" /> Modifier les informations
             </Button>
           ) : (
             <div className="flex gap-2">
               <Button
                 className="rounded-full text-white"
-                onClick={form.handleSubmit((values) => {
-                  console.log("Submitted values:", values);
-                  setEditMode(false);
-                })}
+                disabled={loading}
+                onClick={form.handleSubmit(onSubmit)}
               >
-                Enregistrer
+                {loading ? "Enregistrement..." : "Enregistrer"}
               </Button>
               <Button
                 className="rounded-full"
                 variant="outline"
-                onClick={() => setEditMode(false)}
+                onClick={() => {
+                  setEditMode(false);
+                  form.reset(); // on remet les valeurs initiales si on annule
+                }}
               >
                 Annuler
               </Button>
             </div>
           )}
         </CardHeader>
+
         <Form {...form}>
           <CardContent className="grid grid-cols-1 md:grid-cols-1 gap-4 text-sm">
             <FormField
               control={form.control}
-              name="nom"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nom(s)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nom complet" {...field} />
+                    <Input
+                      placeholder="Nom complet"
+                      {...field}
+                      disabled={!editMode} // champs non modifiable
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -157,12 +245,16 @@ const DetailDoctor = () => {
 
             <FormField
               control={form.control}
-              name="prenom"
+              name="lastName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Prénom(s)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Prénom" {...field} />
+                    <Input
+                      placeholder="Prénom"
+                      {...field}
+                      disabled={!editMode}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -170,12 +262,12 @@ const DetailDoctor = () => {
 
             <FormField
               control={form.control}
-              name="sexe"
+              name="sex"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sexe</FormLabel>
                   <FormControl>
-                    <Input placeholder="Sexe" {...field} />
+                    <Input placeholder="Sexe" {...field} disabled={!editMode} />
                   </FormControl>
                 </FormItem>
               )}
@@ -188,7 +280,11 @@ const DetailDoctor = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Adresse email" {...field} />
+                    <Input
+                      placeholder="Adresse email"
+                      {...field}
+                      disabled={!editMode}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -196,12 +292,16 @@ const DetailDoctor = () => {
 
             <FormField
               control={form.control}
-              name="telephone"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Téléphone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Numéro de téléphone" {...field} />
+                    <Input
+                      placeholder="Numéro de téléphone"
+                      {...field}
+                      disabled={!editMode}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -209,12 +309,16 @@ const DetailDoctor = () => {
 
             <FormField
               control={form.control}
-              name="adresse"
+              name="address"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Adresse</FormLabel>
                   <FormControl>
-                    <Input placeholder="Adresse physique" {...field} />
+                    <Input
+                      placeholder="Adresse physique"
+                      {...field}
+                      disabled={!editMode}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -303,69 +407,69 @@ const DetailDoctor = () => {
                   />{" "}
                 </PopoverTrigger>
                 <PopoverContent className="">
-                <div className="p-4 space-y-4">
-                <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Filtre
-                </h2>
+                  <div className="p-4 space-y-4">
+                    <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      Filtre
+                    </h2>
 
-                {/* Adresse */}
-                <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    {/* Adresse */}
+                    <div className="space-y-1">
+                      <Label htmlFor="adresse">Adresse</Label>
+                      <Select value={adresse} onValueChange={setAdresse}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionner une adresse" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="adresse1">Adresse 1</SelectItem>
+                          <SelectItem value="adresse2">Adresse 2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
+                    {/* Date */}
+                    <div className="space-y-1">
+                      <Label htmlFor="date">Date</Label>
+                      <Input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        id="date"
+                      />
+                    </div>
 
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    {/* Statut */}
+                    <div className="space-y-1">
+                      <Label htmlFor="statut">Statut</Label>
+                      <Select value={statut} onValueChange={setStatut}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionner le statut" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="valide">Validé</SelectItem>
+                          <SelectItem value="en_cours">En cours</SelectItem>
+                          <SelectItem value="rejeté">Rejeté</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
-                    }}
-                    className="rounded-full"
-                  >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
-                </div>
-              </div>
+                    {/* Boutons */}
+                    <div className="flex justify-between pt-2 ">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setAdresse("");
+                          setDate("");
+                          setStatut("");
+                        }}
+                        className="rounded-full"
+                      >
+                        Réinitialiser
+                      </Button>
+                      <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
+                        Appliquer
+                      </Button>
+                    </div>
+                  </div>
                 </PopoverContent>
               </Popover>
             </div>

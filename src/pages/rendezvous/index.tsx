@@ -52,7 +52,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
-
+import useStoreAllReservation from "src/store/reservation/getAll";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function RendezVous() {
   const [isChecked, setIsChecked] = useState(false);
@@ -66,19 +67,18 @@ export default function RendezVous() {
 
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const { AllReservation, loadingAllReservation, fetchAllReservation, count } =
+    useStoreAllReservation();
+
+  console.log("AllReservation", AllReservation);
 
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchAllReservation({ page, limit: 6 });
+  }, [page, fetchAllReservation]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAllReservation) {
     return <TotalLoad />;
   }
 
@@ -161,7 +161,7 @@ export default function RendezVous() {
               />{" "}
             </PopoverTrigger>
             <PopoverContent className="">
-            <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
@@ -250,7 +250,7 @@ export default function RendezVous() {
         </TableHeader>
 
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {AllReservation?.map((a, i) => (
             <TableRow
               key={i}
               className="hover:bg-gray-50 transition-colors cursor-pointer"
@@ -290,17 +290,27 @@ export default function RendezVous() {
                     />
                     <AvatarFallback>NM</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">Nana Momo</span>
+                  <span className="font-medium">{a.patientName}</span>
                 </div>
               </TableCell>
 
-              <TableCell>Nettoyage des dents</TableCell>
-              <TableCell>Douala, Cameroun</TableCell>
-              <TableCell>01/02/2024</TableCell>
+              <TableCell>{a.description}</TableCell>
+              <TableCell>{a.location}</TableCell>
+              <TableCell>
+                {" "}
+                {new Date(a.date).toLocaleDateString("fr-FR")}
+              </TableCell>
 
               <TableCell>
-                <span className="bg-green-100 text-green-700 rounded-full px-3 py-1 text-xs font-medium">
-                  Payé
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium 
+              ${
+                a.status === "COMPLETED"
+                  ? "bg-green-200 text-green-700"
+                  : "bg-yellow-200 text-yellow-700"
+              }`}
+                >
+                  {a.status}
                 </span>
               </TableCell>
 
@@ -339,39 +349,19 @@ export default function RendezVous() {
             </TableRow>
           ))}
         </TableBody>
-
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t pt-4 gap-4">
-                <p className="text-sm text-gray-500">Page 1 sur 34</p>
-
-                <div className="flex items-center gap-1 flex-wrap">
-                  <Button variant="outline" size="icon" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 

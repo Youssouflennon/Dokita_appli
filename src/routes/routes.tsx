@@ -54,13 +54,13 @@ const routes: RouteType[] = [
   },
 
   {
-    path: "/detail_patient",
+    path: "/detail_patient/:id",
     element: (
       <ProtectedRoute>
         <MainLayout />
       </ProtectedRoute>
     ),
-    children: [{ path: "/detail_patient", element: <DetailPatient /> }],
+    children: [{ path: "/detail_patient/:id", element: <DetailPatient /> }],
   },
 
   {
@@ -74,13 +74,13 @@ const routes: RouteType[] = [
   },
 
   {
-    path: "/detail_doctor",
+    path: "/detail_doctor/:id",
     element: (
       <ProtectedRoute>
         <MainLayout />
       </ProtectedRoute>
     ),
-    children: [{ path: "/detail_doctor", element: <DetailDoctor /> }],
+    children: [{ path: "/detail_doctor/:id", element: <DetailDoctor /> }],
   },
 
   {

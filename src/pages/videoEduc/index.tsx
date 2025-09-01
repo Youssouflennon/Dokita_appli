@@ -53,6 +53,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreVideos from "src/store/video/getAll";
+import dayjs from "dayjs";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function Video() {
   const [isChecked, setIsChecked] = useState(false);
@@ -66,19 +69,23 @@ export default function Video() {
 
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const { Videos, loadingVideos, fetchVideos, count } = useStoreVideos();
+
+  const handleSearch = (e: string) => {
+    setSearch(e);
+    setPage(1);
+  };
+
+  console.log("Videos", Videos);
 
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchVideos({ page, limit: 7 });
+  }, [page, fetchVideos]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingVideos) {
     return <TotalLoad />;
   }
 
@@ -248,7 +255,7 @@ export default function Video() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Videos?.map((a, i) => (
             <TableRow
               key={i}
               //  className="cursor-pointer"
@@ -264,11 +271,14 @@ export default function Video() {
                 />{" "}
               </TableCell>
               <TableCell className="flex items-center gap-2">
-                Comment prévenir le Palu
+                {a.title}
               </TableCell>
-              <TableCell className="text-blue-600">Nutrition</TableCell>
+              <TableCell className="text-blue-600">{a.category}</TableCell>
               <TableCell>12</TableCell>
-              <TableCell>01/02/2024 à 12:30</TableCell>
+              <TableCell>
+                {" "}
+                {dayjs(a.createdAt).format("DD/MM/YYYY HH:mm")}
+              </TableCell>
 
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Popover>
@@ -324,44 +334,18 @@ export default function Video() {
           ))}
         </TableBody>
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 
