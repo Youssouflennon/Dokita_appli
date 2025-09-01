@@ -22,7 +22,12 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/components/ui/avatar";
-import { ChevronLeft, ChevronRight, MoreHorizontal, PlusCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  PlusCircle,
+} from "lucide-react";
 import { Input } from "../../components/components/ui/input";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
 import { CustomSwitch } from "../../components/components/ui/customswitch";
@@ -46,6 +51,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreAbonnements from "src/store/abonnement/getAll";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function Abonnement() {
   const [isChecked, setIsChecked] = useState(false);
@@ -58,21 +65,20 @@ export default function Abonnement() {
   const [statut, setStatut] = useState("");
 
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
 
-  
   const [loading, setLoading] = useState(true);
 
+  const { Abonnements, loadingAbonnements, fetchAbonnements, count } =
+    useStoreAbonnements();
+
+  console.log("Abonnements", Abonnements);
+
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchAbonnements({ page, limit: 6 });
+  }, [page, fetchAbonnements]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAbonnements) {
     return <TotalLoad />;
   }
 
@@ -80,7 +86,7 @@ export default function Abonnement() {
     <div className="flex flex-col p-4 h-full">
       <div className="flex justify-end">
         <div className="flex bg-primary p-2 rounded-full my-3 items-center gap-2 cursor-pointer text-white">
-        <PlusCircle className="w-4 h-4" />   Ajouter un abonnement
+          <PlusCircle className="w-4 h-4" /> Ajouter un abonnement
         </div>
       </div>
 
@@ -155,7 +161,7 @@ export default function Abonnement() {
               />{" "}
             </PopoverTrigger>
             <PopoverContent className="">
-            <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
@@ -231,96 +237,84 @@ export default function Abonnement() {
                 label=""
                 checked={isChecked}
                 onChange={(e) => setIsChecked(e.target.checked)}
-              />{" "}
+              />
             </TableHead>
-            <TableHead>Nom complet</TableHead>
-            <TableHead>Adresse Email</TableHead>
-            <TableHead>Numéro</TableHead>
-            <TableHead>Adresse</TableHead>
-            <TableHead>Date d’insc.</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead></TableHead>
+            <TableHead>Patient ID</TableHead>
+            <TableHead>Médecin ID</TableHead>
+            <TableHead>Début</TableHead>
+            <TableHead>Fin</TableHead>
+            <TableHead>Montant</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Abonnements.map((item) => (
             <TableRow
-              key={i}
-              //  className="cursor-pointer"
-              onClick={() => {
-                //  navigate("/detail_patient");
-              }}
+              key={item.abonnementId}
+              // onClick={() => navigate(`/detail/${item.abonnementId}`)}
             >
+              {/* Checkbox par ligne */}
               <TableCell>
                 <CustomCheckbox
                   label=""
                   checked={isChecked}
                   onChange={(e) => setIsChecked(e.target.checked)}
-                />{" "}
+                />
               </TableCell>
-              <TableCell className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src="https://i.pravatar.cc/40?img=3"
-                    alt="Avatar"
-                  />
-                  <AvatarFallback>NM</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">Nana Momo</span>
+
+              {/* Données */}
+              <TableCell>{item.patientId}</TableCell>
+              <TableCell>{item.medecinId}</TableCell>
+              <TableCell>
+                {new Date(item.debutDate).toLocaleDateString("fr-FR")}
               </TableCell>
-              <TableCell className="text-blue-600 underline">
-                darlenrobertson@gmail.com
+              <TableCell>
+                {new Date(item.endDate).toLocaleDateString("fr-FR")}
               </TableCell>
-              <TableCell>+237 691 234 567</TableCell>
-              <TableCell>Douala, Cameroun</TableCell>
-              <TableCell>01/02/2024</TableCell>
-              <TableCell className="bg-green-200 text-green-600 rounded-full p-2 inline-block">
-                Active
+              <TableCell className="font-semibold text-gray-700">
+                {Number(item.amount).toLocaleString("fr-FR")} FCFA
               </TableCell>
+
+              {/* Status */}
+              <TableCell>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium 
+              ${
+                item.status === "CONFIRMED"
+                  ? "bg-green-200 text-green-700"
+                  : "bg-yellow-200 text-yellow-700"
+              }`}
+                >
+                  {item.status}
+                </span>
+              </TableCell>
+
+              {/* Actions */}
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Popover>
-                  <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
+                  <PopoverTrigger className="bg-gray-200 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100">
                     <MoreHorizontal className="w-4 h-4" />
                   </PopoverTrigger>
                   <PopoverContent className="p-4 w-full">
                     <ul className="space-y-2 cursor-pointer">
                       <li
                         className="flex items-center gap-2 p-2 border-b last:border-none"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setDetailCard(true);
-
-                          //  handleRowClick(item.id);
-                        }}
-                        // navigate(0);
+                        onClick={() => setDetailCard(true)}
                       >
-                        <FaEdit
-                          className="text-gray-600 text-lg cursor-pointer"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setDetailCard(true);
-
-                            //  handleRowClick(item.id);
-                          }}
-                        />
-                        <span className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200">
-                          Detail
+                        <FaEdit className="text-gray-600 text-lg" />
+                        <span className="font-medium text-gray-500 text-sm hover:text-gray-600">
+                          Détail
                         </span>
                       </li>
-
                       <li
                         className="flex items-center gap-2 p-2 border-b last:border-none"
-                        onClick={(event) => {
-                          event.stopPropagation();
-
-                          // setSelectedUser(item.id);
-                          setIsOpen(true);
-                        }}
-                        // navigate(0);
+                        onClick={() => setIsOpen(true)}
                       >
-                        <FaTrash className="text-red-600 text-lg cursor-pointer" />
-                        <span className="font-medium text-red-500 text-sm hover:text-red-600 transition-colors duration-200">
-                          supprimer
+                        <FaTrash className="text-red-600 text-lg" />
+                        <span className="font-medium text-red-500 text-sm hover:text-red-600">
+                          Supprimer
                         </span>
                       </li>
                     </ul>
@@ -331,44 +325,18 @@ export default function Abonnement() {
           ))}
         </TableBody>
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 

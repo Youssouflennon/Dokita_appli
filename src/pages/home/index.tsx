@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import useStoreOverview from "src/store/admin/overview";
+import useStoreTopDoctors from "src/store/admin/topDoctors";
 
 const data = [
   { mois: "Jan", profit: 4000 },
@@ -33,23 +34,19 @@ const Home = () => {
   const { Overview, loadingOverview, fetchOverview, error } =
     useStoreOverview();
 
+  const { TopDoctors, loadingTopDoctors, fetchTopDoctors } =
+    useStoreTopDoctors();
+
   useEffect(() => {
     fetchOverview();
-  }, [fetchOverview]);
+    fetchTopDoctors();
+  }, [fetchOverview, fetchTopDoctors]);
 
   console.log("Overview", Overview);
 
-  useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+  console.log("TopDoctors", TopDoctors);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingOverview) {
     return <TotalLoad />;
   }
   return (
@@ -61,19 +58,19 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <CardStat
             title="Nombre total de Médecins"
-            total={150}
+            total={Overview?.totals?.doctors}
             growth="10.5%"
             growthPositive={true}
-            monthlyChange="+23"
+            monthlyChange={Overview?.totals?.lastMonth?.doctors}
             onClick={() => navigate("/doctors")}
           />
 
           <CardStat
             title="Nombre total de Patients"
-            total={150}
+            total={Overview?.totals?.patients}
             growth="10.5%"
             growthPositive={true}
-            monthlyChange="+23"
+            monthlyChange={Overview?.totals?.lastMonth?.patients}
             onClick={() => navigate("/patients")}
           />
           <CardRdvStat
@@ -98,7 +95,7 @@ const Home = () => {
                 📈 Revenues
               </p>
               <h2 className="text-2xl font-bold text-gray-800">
-                86,044,700 F CFA
+                {Overview?.totalRevenue} F CFA
               </h2>
               <p className="text-sm text-gray-400">De 50,000 XAF</p>
             </div>
@@ -126,26 +123,40 @@ const Home = () => {
           {/* Top médecins */}
           <div className="bg-white p-4 rounded-lg shadow-sm border">
             <h3 className="font-semibold text-gray-800 mb-4">Top médecins</h3>
-            {[1, 2, 3].map((_, i) => (
-              <div key={i} className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/docta.png"
-                    alt="Doctor"
-                    className="w-10 h-10 rounded-full object-cover bg-cover"
-                  />
-                  <div>
-                    <p className="font-medium">Nana Momo Nene</p>
-                    <p className="text-sm text-gray-500">
-                      Cardiologue | Hôpital Général
-                    </p>
+            {TopDoctors?.map((t: any, index: number) => {
+              console.log("DOCTOR ===>", t); // 👈 regarde la structure exacte
+              return (
+                <div
+                  key={index}
+                  className="flex items-center justify-between mb-3"
+                >
+                  <div className="flex items-center gap-3">
+                    {!t?.medecin?.profile ? (
+                      <img
+                        src={t?.medecin?.profile}
+                        alt={`${t?.medecin?.firstName} ${t?.medecin?.lastName}`}
+                        className="w-10 h-10 rounded-full object-cover bg-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
+                        {t?.medecin?.firstName?.charAt(0)}
+                        {t?.medecin?.lastName?.charAt(0)}
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="font-medium">{t?.medecin?.firstName}</p>
+                      <p className="text-sm text-gray-500">
+                        Cardiologue | {t?.medecin?.hospitalName}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-green-600 font-bold">
+                    5 <FaArrowUp className="ml-1 text-xs" />
                   </div>
                 </div>
-                <div className="flex items-center text-green-600 font-bold">
-                  5 <FaArrowUp className="ml-1 text-xs" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Graphique placeholder */}
@@ -212,8 +223,7 @@ function CardStat({
                 : "bg-red-100 text-red-600"
             } text-xs font-medium px-2 py-0.5 rounded-full`}
           >
-            <ArrowUpRight className="w-3 h-3" />
-            {growth}
+            <ArrowUpRight className="w-3 h-3" />+ {growth}
           </span>
         </div>
       </div>

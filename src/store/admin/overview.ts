@@ -16,16 +16,28 @@ const useStoreOverview = create<OverviewState>((set) => ({
   error: null,
 
   fetchOverview: async () => {
+    const savedState = localStorage.getItem("token");
+
+    const token = savedState;
+
+    if (!token) {
+      console.error("No token available. User might not be authenticated.");
+      return;
+    }
+
+    console.log("savedState",savedState )
+
     set({ loadingOverview: true, error: null });
     try {
       const configure = {
         method: "get" as const,
         maxBodyLength: Infinity,
-        //   url: "https://doki-3a9x.onrender.com/admins/stats/overview",
 
         url: `${config.mintClient}admins/stats/overview`,
 
-        headers: {},
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       };
 
       const response = await axios.request(configure);

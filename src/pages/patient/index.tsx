@@ -44,6 +44,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreOverview from "src/store/admin/overview";
+import useStoreAllUsers from "src/store/users/getAll";
+import dayjs from "dayjs";
+import Pagination from "../../components/components/ui/pagination";
+import { joinUrlWithParamsId } from "src/helpers/helpers";
 
 export default function PatientsTable() {
   const [isChecked, setIsChecked] = useState(false);
@@ -53,27 +58,37 @@ export default function PatientsTable() {
   const [adresse, setAdresse] = useState("");
   const [date, setDate] = useState("");
   const [statut, setStatut] = useState("");
+  const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
+  const { Overview, loadingOverview, fetchOverview, error } =
+    useStoreOverview();
+  const [page, setPage] = useState(1);
 
-  const [loading, setLoading] = useState(true);
+  const { AllUsers, loadingAllUsers, fetchAllUsers, updateUserStatus, count } =
+    useStoreAllUsers();
+
+  const handleSearch = (e: string) => {
+    setSearch(e);
+    setPage(1);
+  };
+
+  console.log("AllUsers", AllUsers);
 
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchOverview();
+    fetchAllUsers({ userType: "PATIENT", page, limit: 7 });
+  }, [page, fetchOverview, fetchAllUsers]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAllUsers) {
     return <TotalLoad />;
   }
 
+  const handleRowClick = (id: any) => {
+    navigate(joinUrlWithParamsId("/detail_patient/:id", id));
+  };
+
   return (
-    
     <div className="p-4 h-full">
       <Card className="mb-6">
         <CardHeader>
@@ -83,7 +98,7 @@ export default function PatientsTable() {
                 <p className="text-lg">Nombre total de patient</p>
 
                 <p className="text-2xl font-bold">
-                  1,822{" "}
+                  {Overview?.totals?.patients}{" "}
                   <span className="text-green-500 text-sm ml-1">+5.2%</span>
                 </p>
               </div>
@@ -235,13 +250,11 @@ export default function PatientsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Array.from({ length: 6 }).map((_, i) => (
+            {AllUsers?.map((a, i) => (
               <TableRow
                 key={i}
                 className="cursor-pointer"
-                onClick={() => {
-                  navigate("/detail_patient");
-                }}
+                onClick={() => handleRowClick(a.userId)}
               >
                 <TableCell>
                   <CustomCheckbox
@@ -258,20 +271,22 @@ export default function PatientsTable() {
                     />
                     <AvatarFallback>NM</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">Nana Momo</span>
+                  <span className="font-medium">{a.firstName}</span>
                 </TableCell>
                 <TableCell className="text-blue-600 underline">
-                  darlenrobertson@gmail.com
+                  {a.email}
                 </TableCell>
-                <TableCell>+237 691 234 567</TableCell>
-                <TableCell>Douala, Cameroun</TableCell>
-                <TableCell>01/02/2024</TableCell>
+                <TableCell> {a.phone}</TableCell>
+
+                <TableCell>{a.address}</TableCell>
+                <TableCell>
+                  {dayjs(a.createdAt).format("DD/MM/YYYY HH:mm")}
+                </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <CustomSwitch
-                    label="Active"
-                    enabled={isSwitched}
-                    onChange={setIsSwitched}
-                  />{" "}
+                    enabled={!a.isBlock} // true = Actif, false = Bloqué
+                    onChange={() => updateUserStatus(a.userId)}
+                  />
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Popover>
@@ -282,9 +297,7 @@ export default function PatientsTable() {
                       <ul className="space-y-2 cursor-pointer">
                         <li
                           className="flex items-center gap-2 p-2 border-b last:border-none"
-                          onClick={() => {
-                            navigate("/detail_patient");
-                          }}
+
                           // navigate(0);
                         >
                           <FaEdit
@@ -295,12 +308,15 @@ export default function PatientsTable() {
                               //  handleRowClick(item.id);
                             }}
                           />
-                          <span className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200">
+                          <span
+                            className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200"
+                            onClick={() => handleRowClick(a.userId)}
+                          >
                             Modifier
                           </span>
                         </li>
 
-                        <li
+                        {/*   <li
                           className="flex items-center gap-2 p-2 border-b last:border-none"
                           onClick={(event) => {
                             event.stopPropagation();
@@ -314,7 +330,7 @@ export default function PatientsTable() {
                           <span className="font-medium text-red-500 text-sm hover:text-red-600 transition-colors duration-200">
                             supprimer
                           </span>
-                        </li>
+                        </li> */}
                       </ul>
                     </PopoverContent>
                   </Popover>
@@ -323,44 +339,18 @@ export default function PatientsTable() {
             ))}
           </TableBody>
           <TableFooter className="bg-white">
-            <tr>
-              <td colSpan={8}>
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                  {/* Infos de page */}
-                  <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                  {/* Pagination */}
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {/* Précédent */}
-                    <Button variant="outline" size="lg" disabled>
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-
-                    {/* Pages */}
-                    <Button variant="outline" size="icon">
-                      1
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      2
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      3
-                    </Button>
-                    <Button variant="outline" size="icon" disabled>
-                      …
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      34
-                    </Button>
-
-                    {/* Suivant */}
-                    <Button variant="outline" size="lg">
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
+            <TableRow>
+              <TableCell colSpan={7}>
+                <div className="flex justify-center my-4">
+                  <Pagination
+                    pages={Math.ceil((count || 1) / 7)}
+                    currentPage={page}
+                    onPageChange={setPage}
+                    rangeLimit={5}
+                  />
                 </div>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           </TableFooter>
         </Table>
       </div>

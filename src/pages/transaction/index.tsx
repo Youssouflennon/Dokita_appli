@@ -36,6 +36,8 @@ import {
   SelectValue,
 } from "../../components/components/ui/select";
 import { Input } from "../../components/components/ui/input";
+import Pagination from "../../components/components/ui/pagination";
+
 
 const Transaction = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,20 +46,22 @@ const Transaction = () => {
   const [adresse, setAdresse] = useState("");
   const [date, setDate] = useState("");
   const [statut, setStatut] = useState("");
+  const [page, setPage] = useState(1);
 
-  const [loading, setLoading] = useState(true);
+  const {
+    AllTransactions,
+    loadingAllTransactions,
+    fetchAllTransactions,
+    count,
+  } = useStoreAllTransactions();
+
+  console.log("AllTransactions", AllTransactions);
 
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchAllTransactions({ page, limit: 6 });
+  }, [page, fetchAllTransactions]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAllTransactions) {
     return <TotalLoad />;
   }
 
@@ -133,7 +137,7 @@ const Transaction = () => {
               />{" "}
             </PopoverTrigger>
             <PopoverContent className="">
-            <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
@@ -223,7 +227,7 @@ const Transaction = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {AllTransactions?.map((a, i) => (
             <TableRow
               key={i}
               //  className="cursor-pointer"
@@ -238,18 +242,38 @@ const Transaction = () => {
                   onChange={(e) => setIsChecked(e.target.checked)}
                 />{" "}
               </TableCell>
-              <TableCell className="flex items-center gap-2">6sd541c</TableCell>
-              <TableCell className="text-blue-600 ">Nana Momo </TableCell>
-              <TableCell>Rendez vous</TableCell>
-              <TableCell>01/02/2024</TableCell>
-              <TableCell>20:50 (GMT +1)</TableCell>
-              <TableCell>1 000.000 FCFA</TableCell>
-              <TableCell>Orange Money</TableCell>
-
-              <TableCell className="bg-green-200 text-green-600 rounded-full p-2 inline-block">
-                * Payé
+              <TableCell className="flex items-center gap-2">
+                {a.transactionId}
               </TableCell>
-
+              <TableCell className="text-blue-600 ">Nana Momo </TableCell>
+              <TableCell>{a.type}</TableCell>
+              <TableCell>
+                {" "}
+                {new Date(a.createdAt).toLocaleDateString("fr-FR")}
+              </TableCell>
+              <TableCell>
+                {new Date(a.createdAt).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+              </TableCell>{" "}
+              <TableCell className="font-semibold text-gray-700">
+                {Number(a.amount).toLocaleString("fr-FR")} FCFA
+              </TableCell>
+              <TableCell>Orange Money</TableCell>
+              <TableCell>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium 
+              ${
+                a.status === "PAID"
+                  ? "bg-green-200 text-green-700"
+                  : "bg-yellow-200 text-yellow-700"
+              }`}
+                >
+                  {a.status}
+                </span>{" "}
+              </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Popover>
                   <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
@@ -300,50 +324,23 @@ const Transaction = () => {
                   </PopoverContent>
                 </Popover>
               </TableCell>
-
               <TableCell></TableCell>
             </TableRow>
           ))}
         </TableBody>
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 
@@ -404,6 +401,7 @@ export default Transaction;
 
 import { ReactNode } from "react";
 import DetailTrans from "./detailTrans";
+import useStoreAllTransactions from "src/store/transaction.ts/getAll";
 
 interface StatCardProps {
   title: string;

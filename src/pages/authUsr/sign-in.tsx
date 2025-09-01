@@ -1,4 +1,15 @@
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../components/components/ui/button";
+import { Input } from "../../components/components/ui/input";
+import { Label } from "../../components/components/ui/label";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { useToast } from "../../components/hooks/use-toast";
+import { useTranslation } from "../../hooks/useTranslation";
+import useAddessloginUserStore from "src/store/auth/login";
+
+// shadcn form
 import {
   Form,
   FormItem,
@@ -6,82 +17,67 @@ import {
   FormMessage,
   FormField,
 } from "./../../components/components/ui/form";
-import React, { useState } from "react";
-import { Button } from "./../../components/components/ui/button";
-import { useAuthStore } from "../../store/authStore";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "../../components/hooks/use-toast";
-import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { useTranslation } from "../../hooks/useTranslation";
-import { Input } from "../../components/components/ui/input";
-import { Label } from "../../components/components/ui/label";
+
+type SignInFormValues = {
+  phone: string;
+  password: string;
+};
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
-  const methods = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { loginUser, loginUserResponse, loading, error } =
+    useAddessloginUserStore((state) => state);
+
+  const form = useForm<SignInFormValues>({
+    defaultValues: { phone: "", password: "" },
     mode: "onChange",
   });
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
-  const onSubmit = async (data: { email: string; password: string }) => {
-    navigate("/");
+  const onSubmit = async (data: SignInFormValues) => {
+    try {
+      const response = await loginUser(data); // ici le backend reçoit { phone, password }
+      if (response?.token) {
+        // Stockage local
+        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("token", response.token);
 
-    /*     try {
-      setIsLoading(true);
-      await login(data.email, data.password);
-      toast({
-        title: t("auth.success_connection"),
-        description: t("auth.success_connection_description"),
-      });
-      navigate("/");
-    } catch (error: any) {
-      console.error(t("auth.error_connection"), error);
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue sur Dokita 🚀",
+        });
 
-      if (error.response) {
-        const status = error.response.status;
-
-        if (status === 401) {
-          toast({
-            variant: "destructive",
-            title: t("auth.error_connection"),
-            description: t("auth.error_connection_description"),
-          });
-        } else if (status === 200) {
-          toast({
-            title: t("auth.success_connection"),
-            description: t("auth.success_connection_description"),
-          });
-          navigate("/");
-        } else {
-          toast({
-            variant: "destructive",
-            title: t("auth.error_connection"),
-            description: t("auth.error_connection_description"),
-          });
-        }
+        navigate("/");
       } else {
         toast({
           variant: "destructive",
-          title: t("auth.error_connection"),
-          description: t("auth.error_connection_description"),
+          title: "Erreur",
+          description: "Numéro ou mot de passe incorrect",
         });
       }
-    } finally {
-      setIsLoading(false);
-    } */
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: "Veuillez réessayer plus tard",
+      });
+    }
   };
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error,
+      });
+    }
+  }, [error]);
 
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center px-4">
@@ -106,35 +102,72 @@ const SignIn = () => {
             <h1 className="text-3xl font-bold text-gray-800">Dokita</h1>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="username">Nom d’utilisateur</Label>
-              <Input
-                id="username"
-                placeholder="Entrez votre nom d’utilisateur ou email"
-                className="mt-1"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Phone */}
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label htmlFor="phone">Téléphone</Label>
+                    <FormControl>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Entrez votre numéro de téléphone"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div>
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Entrez votre mot de passe"
-                className="mt-1"
+              {/* Password */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label htmlFor="password">Mot de passe</Label>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Entrez votre mot de passe"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 bg-transparent shadow-none"
+                        >
+                          {showPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <Button
-              className="w-full text-white rounded-full bg-primary hover:bg-[#1b324f]"
-              onClick={() => {
-                navigate("/");
-              }}
-            >
-              Connexion
-            </Button>
-          </div>
+              {/* Bouton */}
+              <Button
+                type="submit"
+                className="w-full text-white rounded-full bg-primary hover:bg-[#1b324f]"
+                disabled={loading}
+              >
+                {loading && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+                Connexion
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
