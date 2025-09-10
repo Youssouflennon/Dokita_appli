@@ -4,8 +4,9 @@ import axios from "axios";
 import config from "src/config/config.dev";
 
 interface UserFilters {
-  status?: "PENDING" | "PAID" | "CANCELLED";
-  type?: "RESERVATION" | "ABONNEMENT";
+  medecinId?: string;
+  patientId?: string;
+  reservationId?: string;
   page?: number;
   limit?: number;
 }
@@ -33,8 +34,10 @@ const useStoreAllOrdonnances = create<AllOrdonnancesState>((set, get) => ({
 
     const params = new URLSearchParams();
     if (filters) {
-      if (filters.status) params.append("status", filters.status);
-      if (filters.type) params.append("status", filters.type);
+      if (filters.medecinId) params.append("medecinId", filters.medecinId);
+      if (filters.patientId) params.append("patientId", filters.patientId);
+      if (filters.reservationId)
+        params.append("reservationId", filters.reservationId);
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
     }
@@ -46,10 +49,10 @@ const useStoreAllOrdonnances = create<AllOrdonnancesState>((set, get) => ({
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+      console.log("response", response.data);
       set({
-        AllOrdonnances: response.data.items,
-        count: response.data.meta.total,
+        AllOrdonnances: response.data,
+        //count: response.data.meta.total,
         loadingAllOrdonnances: false,
       });
     } catch (error) {

@@ -28,7 +28,6 @@ const data = [
 ];
 
 const Home = () => {
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const { Overview, loadingOverview, fetchOverview, error } =
@@ -75,14 +74,16 @@ const Home = () => {
           />
           <CardRdvStat
             title="Nombres total des rendez vous"
-            activeCount={234}
-            expiredCount={67}
+            COMPLETED={Overview?.reservationsByStatus?.total?.COMPLETED}
+            CANCELLED={Overview?.reservationsByStatus?.total?.CANCELLED}
+            PENDING={Overview?.reservationsByStatus?.total?.PENDING}
             onClick={() => navigate("/rendez_vous")}
           />
           <CardRdvStat
             title="Transactions"
-            activeCount={234}
-            expiredCount={67}
+            PENDING={Overview?.transactionsByStatus?.PENDING}
+            CANCELLED={Overview?.transactionsByStatus?.CANCELLED}
+            PAID={Overview?.transactionsByStatus?.PAID}
             onClick={() => navigate("/transaction")}
           />
         </div>
@@ -236,16 +237,20 @@ function CardStat({
 }
 
 type CardRdvStatProps = {
-  title: string;
-  activeCount: number;
-  expiredCount: number;
+  title?: string;
+  COMPLETED?: number;
+  CANCELLED?: number;
+  PENDING?: number;
+  PAID?: number;
   onClick?: () => void;
 };
 
 function CardRdvStat({
   title,
-  activeCount,
-  expiredCount,
+  COMPLETED,
+  CANCELLED,
+  PENDING,
+  PAID,
   onClick,
 }: CardRdvStatProps) {
   return (
@@ -257,23 +262,49 @@ function CardRdvStat({
         <p className="text-sm text-gray-500">{title}</p>
 
         <div className="mt-2 space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-semibold text-gray-900">
-              {activeCount}
-            </span>
-            <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium">
-              Actifs
-            </span>
-          </div>
+          {COMPLETED && (
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-semibold text-gray-900">
+                {COMPLETED}
+              </span>
+              <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium">
+                COMPLETED
+              </span>
+            </div>
+          )}
 
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-semibold text-gray-900">
-              {expiredCount}
-            </span>
-            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
-              Expirés
-            </span>
-          </div>
+          {CANCELLED && (
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-semibold text-gray-900">
+                {CANCELLED}
+              </span>
+              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+                ANNULE
+              </span>
+            </div>
+          )}
+
+          {PENDING && (
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-semibold text-gray-900">
+                {PENDING}
+              </span>
+              <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full font-medium">
+                EN ATTENTE
+              </span>
+            </div>
+          )}
+
+          {PAID && (
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-semibold text-gray-900">
+                {PAID}
+              </span>
+              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">
+                PAYE
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

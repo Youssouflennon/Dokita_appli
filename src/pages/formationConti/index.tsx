@@ -54,6 +54,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreAllFormation from "src/store/formation/getAll";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function FormationCont() {
   const [isChecked, setIsChecked] = useState(false);
@@ -67,19 +69,18 @@ export default function FormationCont() {
 
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const { AllFormation, loadingAllFormation, fetchAllFormation, count } =
+    useStoreAllFormation();
+
+  console.log("AllFormation", AllFormation);
 
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchAllFormation({ page, limit: 6 });
+  }, [page, fetchAllFormation]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAllFormation) {
     return <TotalLoad />;
   }
 
@@ -218,7 +219,7 @@ export default function FormationCont() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {AllFormation?.map((a: any, i: any) => (
             <TableRow
               key={i}
               //  className="cursor-pointer"
@@ -234,15 +235,19 @@ export default function FormationCont() {
                 />{" "}
               </TableCell>
               <TableCell className="flex items-center gap-2">
-                Paludisme
+                {a.name}
               </TableCell>
-              <TableCell className="text-blue-600">
-                Nettoyage des dents
-              </TableCell>
-              <TableCell>12:00</TableCell>
+              <TableCell className="text-blue-600">{a.comment}</TableCell>
+              <TableCell>
+                {new Date(a.createdAt).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </TableCell>{" "}
               <TableCell>5</TableCell>
-              <TableCell>01/02/2024</TableCell>
-
+              <TableCell>
+                {new Date(a.createdAt).toLocaleDateString("fr-FR")}
+              </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Popover>
                   <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
@@ -297,44 +302,18 @@ export default function FormationCont() {
           ))}
         </TableBody>
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 

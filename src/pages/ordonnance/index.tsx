@@ -22,7 +22,12 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/components/ui/avatar";
-import { ChevronLeft, ChevronRight, MoreHorizontal, PlusCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  PlusCircle,
+} from "lucide-react";
 import { Input } from "../../components/components/ui/input";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
 import { CustomSwitch } from "../../components/components/ui/customswitch";
@@ -48,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreAllOrdonnances from "src/store/ordonnance/getAll";
 
 export default function Ordannance() {
   const [isChecked, setIsChecked] = useState(false);
@@ -61,22 +67,19 @@ export default function Ordannance() {
 
   const navigate = useNavigate();
 
-  
   const [loading, setLoading] = useState(true);
 
+  const { AllOrdonnances, loadingAllOrdonnances, fetchAllOrdonnances, count } =
+    useStoreAllOrdonnances();
+
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    fetchAllOrdonnances();
+  }, [fetchAllOrdonnances]);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAllOrdonnances) {
     return <TotalLoad />;
   }
+  console.log("AllOrdonnances", AllOrdonnances);
 
   return (
     <div className="flex flex-col p-4 h-full">
@@ -87,7 +90,7 @@ export default function Ordannance() {
             navigate("/ajouter_ordonnance");
           }}
         >
-        <PlusCircle className="w-4 h-4" />     Ajouter une ordonnance
+          <PlusCircle className="w-4 h-4" /> Ajouter une ordonnance
         </div>
       </div>
 
@@ -158,7 +161,7 @@ export default function Ordannance() {
               />{" "}
             </PopoverTrigger>
             <PopoverContent className="">
-            <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
@@ -246,7 +249,7 @@ export default function Ordannance() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {AllOrdonnances?.map((a, i) => (
             <TableRow
               key={i}
               //  className="cursor-pointer"
@@ -265,11 +268,18 @@ export default function Ordannance() {
                 Paludisme
               </TableCell>
               <TableCell className="text-blue-600">MEXT</TableCell>
-              <TableCell>1562</TableCell>
-              <TableCell>5</TableCell>
+              <TableCell>{a.comment}</TableCell>
+              <TableCell>
+                <TableCell>
+                  <div className="flex flex-col">
+                    {a.traitement?.map((t: string, index: number) => (
+                      <span key={index}>{t}</span>
+                    ))}
+                  </div>
+                </TableCell>
+              </TableCell>{" "}
               <TableCell>Orale</TableCell>
-              <TableCell>15</TableCell>
-
+              <TableCell>{a.dureeTraitement}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Popover>
                   <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
