@@ -100,7 +100,7 @@ const SideBar = () => {
       subItems: [],
     },
     {
-      name: "Message structurés",
+      name: "Fiche structurées",
       pathname: "/message_structure",
       icon: <FaFileAlt />,
       subItems: [],
@@ -109,21 +109,29 @@ const SideBar = () => {
       name: "Formation Continue",
       pathname: "/formation",
       icon: <FaChalkboardTeacher />,
-      subItems: [],
+      subItems: [
+        { name: t("Formation"), pathname: "/formation" },
+        { name: t("Categorie"), pathname: "/categorie" },
+      ],
     },
+
+    {
+      name: "Ordonnance",
+      pathname: "/ordonnance",
+      icon: <FaPrescriptionBottleAlt />,
+      subItems: [
+        { name: t("medicament"), pathname: "/ordonnance" },
+        { name: t("maladie"), pathname: "/listRole" },
+      ],
+    },
+
     {
       name: "Vidéos Educatives",
       pathname: "/videos",
       icon: <FaVideo />,
       subItems: [],
     },
-    {
-      name: "Ordonnance",
-      pathname: "/ordonnance",
-      icon: <FaPrescriptionBottleAlt />,
-      subItems: [],
-    },
-    {
+    /*   {
       name: "Settings",
       pathname: "/settings",
       icon: <FaCog />,
@@ -131,7 +139,7 @@ const SideBar = () => {
         { name: t("button.add"), pathname: "/addRole" },
         { name: t("button.list"), pathname: "/listRole" },
       ],
-    },
+    }, */
   ];
 
   return (
@@ -199,10 +207,10 @@ const SideBar = () => {
                       <div
                         key={subIndex}
                         onClick={() => navigate(subItem.pathname)}
-                        className={`px-4 py-2 rounded-md cursor-pointer ${
+                        className={`px-1 py-1 rounded-md cursor-pointer text-sm ${
                           location.pathname === subItem.pathname
-                            ? "bg-white text-purple-700"
-                            : "hover:bg-gray-100 text-white hover:text-purple-700"
+                            ? "text-yellow-400"
+                            : "hover:text-yellow-300 text-white"
                         }`}
                       >
                         {subItem.name}

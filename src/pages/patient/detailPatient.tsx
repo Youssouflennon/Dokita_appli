@@ -430,7 +430,7 @@ const DetailPatient = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {doctors.map((d, i) => (
+              {OneUser?.abonnementsP.map((d: any, i: any) => (
                 <TableRow
                   key={i}
                   className="cursor-pointer"
@@ -447,16 +447,13 @@ const DetailPatient = () => {
                     />{" "}
                   </TableCell>
                   <TableCell className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={d.avatar} alt="Avatar" />
-                      <AvatarFallback>{d.name}</AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">{d.name}</span>
+                    <span className="font-medium">{d.medecin.firstName}</span>
+                    <span className="font-medium">{d.medecin.lastName}</span>
                   </TableCell>
                   <TableCell className="text-blue-600 underline">
                     {d.specialty}
                   </TableCell>
-                  <TableCell>{d.email}</TableCell>
+                  <TableCell>{d.medecin.email}</TableCell>
                   <TableCell>{d.phone}</TableCell>
                   <TableCell>{d.address}</TableCell>
                   <TableCell className="bg-green-200 text-green-600 rounded-full p-2 inline-block">
@@ -491,49 +488,6 @@ const DetailPatient = () => {
                 </TableRow>
               ))}
             </TableBody>
-
-            <TableFooter className="bg-white">
-              <tr>
-                <td colSpan={8}>
-                  <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                    {/* Infos de page */}
-                    <p className="text-sm text-muted-foreground">
-                      Page 1 sur 34
-                    </p>
-
-                    {/* Pagination */}
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {/* Précédent */}
-                      <Button variant="outline" size="lg" disabled>
-                        <ChevronLeft className="w-4 h-4" />
-                      </Button>
-
-                      {/* Pages */}
-                      <Button variant="outline" size="icon">
-                        1
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        2
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        3
-                      </Button>
-                      <Button variant="outline" size="icon" disabled>
-                        …
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        34
-                      </Button>
-
-                      {/* Suivant */}
-                      <Button variant="outline" size="lg">
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </TableFooter>
           </Table>
         </CardContent>
       </Card>

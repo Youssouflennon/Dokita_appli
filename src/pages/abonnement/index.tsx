@@ -68,6 +68,8 @@ export default function Abonnement() {
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const { Abonnements, loadingAbonnements, fetchAbonnements, count } =
     useStoreAbonnements();
@@ -75,8 +77,18 @@ export default function Abonnement() {
   console.log("Abonnements", Abonnements);
 
   useEffect(() => {
-    fetchAbonnements({ page, limit: 6 });
-  }, [page, fetchAbonnements]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchAbonnements({ page, limit: 6, q: debouncedSearch });
+  }, [page, debouncedSearch, fetchAbonnements]);
 
   if (loadingAbonnements) {
     return <TotalLoad />;
@@ -131,6 +143,8 @@ export default function Abonnement() {
           <input
             type="text"
             placeholder="Rechercher"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
@@ -239,8 +253,8 @@ export default function Abonnement() {
                 onChange={(e) => setIsChecked(e.target.checked)}
               />
             </TableHead>
-            <TableHead>Patient ID</TableHead>
-            <TableHead>Médecin ID</TableHead>
+            <TableHead>Patient </TableHead>
+            <TableHead>Médecin </TableHead>
             <TableHead>Début</TableHead>
             <TableHead>Fin</TableHead>
             <TableHead>Montant</TableHead>
@@ -265,8 +279,13 @@ export default function Abonnement() {
               </TableCell>
 
               {/* Données */}
-              <TableCell>{item.patientId}</TableCell>
-              <TableCell>{item.medecinId}</TableCell>
+              <TableCell>
+                {item.patient.firstName} {item.patient.lastName}
+              </TableCell>
+              <TableCell>
+                {" "}
+                {item.medecin.firstName} {item.medecin.lastName}
+              </TableCell>
               <TableCell>
                 {new Date(item.debutDate).toLocaleDateString("fr-FR")}
               </TableCell>

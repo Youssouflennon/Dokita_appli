@@ -1,4 +1,4 @@
-// src/store/useStoreVideos.ts
+// src/store/useStoreCategories.ts
 import { create } from "zustand";
 import axios from "axios";
 import config from "src/config/config.dev";
@@ -9,22 +9,21 @@ interface VideoFilters {
   date?: string; // ISO ou format attendu par ton backend
   page?: number;
   limit?: number;
-  q?: string;
 }
 
-interface VideosState {
-  Videos: any[];
+interface CategoriesState {
+  Categories: any[];
   count: number;
-  loadingVideos: boolean;
-  fetchVideos: (filters?: VideoFilters) => Promise<void>;
+  loadingCategories: boolean;
+  fetchCategories: (filters?: VideoFilters) => Promise<void>;
 }
 
-const useStoreVideos = create<VideosState>((set) => ({
-  Videos: [],
-  loadingVideos: false,
+const useStoreCategories = create<CategoriesState>((set) => ({
+  Categories: [],
+  loadingCategories: false,
   count: 0,
 
-  fetchVideos: async (filters?: VideoFilters) => {
+  fetchCategories: async (filters?: VideoFilters) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -32,7 +31,7 @@ const useStoreVideos = create<VideosState>((set) => ({
       return;
     }
 
-    set({ loadingVideos: true });
+    set({ loadingCategories: true });
 
     const params = new URLSearchParams();
 
@@ -43,12 +42,11 @@ const useStoreVideos = create<VideosState>((set) => ({
       if (filters.date) params.append("date", filters.date);
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
-      if (filters.q) params.append("q", filters.q);
     }
 
     try {
       const response = await axios.get(
-        `${config.mintClient}videos/?${params.toString()}`,
+        `${config.mintClient}categories/?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -57,15 +55,15 @@ const useStoreVideos = create<VideosState>((set) => ({
       );
 
       set({
-        Videos: response.data.items,
+        Categories: response.data.data,
         count: response.data.meta.total,
-        loadingVideos: false,
+        loadingCategories: false,
       });
     } catch (error) {
-      console.error("Error fetching Videos:", error);
-      set({ loadingVideos: false });
+      console.error("Error fetching Categories:", error);
+      set({ loadingCategories: false });
     }
   },
 }));
 
-export default useStoreVideos;
+export default useStoreCategories;

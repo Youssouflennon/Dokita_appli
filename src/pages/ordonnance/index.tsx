@@ -22,7 +22,12 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/components/ui/avatar";
-import { ChevronLeft, ChevronRight, MoreHorizontal, PlusCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  PlusCircle,
+} from "lucide-react";
 import { Input } from "../../components/components/ui/input";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
 import { CustomSwitch } from "../../components/components/ui/customswitch";
@@ -48,6 +53,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/components/ui/select";
+import useStoreAllOrdonnances from "src/store/ordonnance/getAll";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function Ordannance() {
   const [isChecked, setIsChecked] = useState(false);
@@ -61,22 +68,33 @@ export default function Ordannance() {
 
   const navigate = useNavigate();
 
-  
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  const { AllOrdonnances, loadingAllOrdonnances, fetchAllOrdonnances, count } =
+    useStoreAllOrdonnances();
+
   useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
 
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
 
-  if (loading) {
+  useEffect(() => {
+    fetchAllOrdonnances({ page, limit: 5, q: debouncedSearch });
+  }, [page, debouncedSearch, fetchAllOrdonnances]);
+
+  if (loadingAllOrdonnances) {
     return <TotalLoad />;
   }
+  console.log("AllOrdonnances", AllOrdonnances);
 
   return (
     <div className="flex flex-col p-4 h-full">
@@ -87,7 +105,7 @@ export default function Ordannance() {
             navigate("/ajouter_ordonnance");
           }}
         >
-        <PlusCircle className="w-4 h-4" />     Ajouter une ordonnance
+          <PlusCircle className="w-4 h-4" /> Ajouter une ordonnance
         </div>
       </div>
 
@@ -128,6 +146,8 @@ export default function Ordannance() {
           <input
             type="text"
             placeholder="Rechercher"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
@@ -158,7 +178,7 @@ export default function Ordannance() {
               />{" "}
             </PopoverTrigger>
             <PopoverContent className="">
-            <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
@@ -246,7 +266,7 @@ export default function Ordannance() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {AllOrdonnances?.map((a, i) => (
             <TableRow
               key={i}
               //  className="cursor-pointer"
@@ -265,11 +285,18 @@ export default function Ordannance() {
                 Paludisme
               </TableCell>
               <TableCell className="text-blue-600">MEXT</TableCell>
-              <TableCell>1562</TableCell>
-              <TableCell>5</TableCell>
+              <TableCell>{a.comment}</TableCell>
+              <TableCell>
+                <TableCell>
+                  <div className="flex flex-col">
+                    {a.traitement?.map((t: string, index: number) => (
+                      <span key={index}>{t}</span>
+                    ))}
+                  </div>
+                </TableCell>
+              </TableCell>{" "}
               <TableCell>Orale</TableCell>
-              <TableCell>15</TableCell>
-
+              <TableCell>{a.dureeTraitement}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Popover>
                   <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
@@ -324,44 +351,18 @@ export default function Ordannance() {
           ))}
         </TableBody>
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 

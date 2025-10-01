@@ -11,6 +11,7 @@ interface UserFilters {
   isVerified?: boolean;
   page?: number;
   limit?: number;
+  q?: string;
 }
 
 interface AllUsersState {
@@ -38,6 +39,7 @@ const useStoreAllUsers = create<AllUsersState>((set, get) => ({
     const params = new URLSearchParams();
     if (filters) {
       if (filters.name) params.append("name", filters.name);
+      if (filters.q) params.append("q", filters.q);
       if (filters.userType) params.append("userType", filters.userType);
       if (filters.isBlock !== undefined)
         params.append("isBlock", String(filters.isBlock));
