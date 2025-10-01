@@ -10,33 +10,137 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/components/ui/select";
 
+// Type d’un symptôme
 type Symptom = {
   nom: string;
   mode: string;
-  duree: string;
   intensite: string;
   siege: string;
   type: string;
   irradiation: string;
+  duree: string;
   rythme: string;
   aggravants: string;
   calmants: string;
   signes: string;
 };
 
+// Définition des champs MISTIDRACS
+type SymptomField = {
+  key: keyof Symptom;
+  labelAdmin: string; // Vue admin
+  question: string; // Vue patient
+  options?: string[]; // Choix possibles
+};
+
+const fields: SymptomField[] = [
+  {
+    key: "nom",
+    labelAdmin: "Nom du symptôme principal",
+    question: "Quel est le symptôme principal ?",
+  },
+  {
+    key: "mode",
+    labelAdmin: "Mode d’apparition (Comment ça a commencé ?)",
+    question: "Comment ça a commencé ?",
+    options: ["D’un coup", "Petit à petit", "Depuis longtemps"],
+  },
+  {
+    key: "intensite",
+    labelAdmin: "Intensité (À quel point c’est fort ?)",
+    question: "À quel point c’est fort ?",
+    options: ["Pas fort (1–3)", "Moyennement fort (4–6)", "Très fort (7–10)"],
+  },
+  {
+    key: "siege",
+    labelAdmin: "Endroit (Où exactement ?)",
+    question: "Où exactement ?",
+  },
+  {
+    key: "type",
+    labelAdmin: "Type (Comment vous sentez la douleur ?)",
+    question: "Comment vous sentez la douleur ?",
+    options: [
+      "Comme une brûlure",
+      "Comme un serrement",
+      "Comme un coup d’aiguille",
+      "Comme une lourdeur",
+      "Autre",
+    ],
+  },
+  {
+    key: "irradiation",
+    labelAdmin: "Irradiation (Est-ce que ça se propage ailleurs ?)",
+    question: "Est-ce que ça se propage ailleurs ?",
+    options: ["Oui → préciser", "Non"],
+  },
+  {
+    key: "duree",
+    labelAdmin: "Durée (Depuis combien de temps ?)",
+    question: "Depuis combien de temps ça dure ?",
+    options: ["Minutes", "Heures", "Jours", "Semaines", "Mois"],
+  },
+  {
+    key: "rythme",
+    labelAdmin: "Rythme (Quand apparaît le plus souvent ?)",
+    question: "À quel moment ça apparaît le plus souvent ?",
+    options: [
+      "La journée",
+      "La nuit",
+      "Quand vous bougez",
+      "Au repos",
+      "Après avoir mangé",
+      "Quand vous êtes fatigué",
+    ],
+  },
+  {
+    key: "aggravants",
+    labelAdmin: "Aggravants (Qu’est-ce qui rend ça pire ?)",
+    question: "Qu’est-ce qui rend ça pire ?",
+    options: ["Effort", "Marche", "Position", "Nourriture", "Stress"],
+  },
+  {
+    key: "calmants",
+    labelAdmin: "Calmants (Qu’est-ce qui soulage ?)",
+    question: "Qu’est-ce qui soulage ?",
+    options: ["Repos", "Médicaments", "Massage", "Position particulière"],
+  },
+  {
+    key: "signes",
+    labelAdmin: "Signes associés (Autres symptômes observés ?)",
+    question: "Avez-vous remarqué d’autres signes en même temps ?",
+    options: [
+      "Fièvre",
+      "Nausées / vomissements",
+      "Vertiges",
+      "Amaigrissement",
+      "Sueurs",
+      "Toux",
+      "Autre",
+    ],
+  },
+];
+
 const AddMessage = () => {
   const navigate = useNavigate();
 
   const [symptoms, setSymptoms] = useState<Symptom[]>([
     {
-      nom: "Douleur abdominale",
+      nom: "",
       mode: "",
-      duree: "",
       intensite: "",
       siege: "",
       type: "",
       irradiation: "",
+      duree: "",
       rythme: "",
       aggravants: "",
       calmants: "",
@@ -44,18 +148,18 @@ const AddMessage = () => {
     },
   ]);
 
-  // Ajouter un nouveau symptôme
+  // Ajouter un symptôme
   const addSymptom = () => {
     setSymptoms([
       ...symptoms,
       {
         nom: "",
         mode: "",
-        duree: "",
         intensite: "",
         siege: "",
         type: "",
         irradiation: "",
+        duree: "",
         rythme: "",
         aggravants: "",
         calmants: "",
@@ -64,7 +168,7 @@ const AddMessage = () => {
     ]);
   };
 
-  // Mettre à jour un champ
+  // Mise à jour d’un champ
   const updateSymptom = (
     index: number,
     field: keyof Symptom,
@@ -75,7 +179,7 @@ const AddMessage = () => {
     setSymptoms(updated);
   };
 
-  // Générer le résumé structuré
+  // Générer le résumé médical
   const generateSummary = (): string => {
     if (symptoms.length === 0) return "";
 
@@ -110,6 +214,7 @@ const AddMessage = () => {
 
   return (
     <div className="h-screen p-4 space-y-6">
+      {/* En-tête */}
       <h1
         className="text-xl font-semibold cursor-pointer"
         onClick={() => navigate(-1)}
@@ -136,7 +241,7 @@ const AddMessage = () => {
         <PlusCircle className="w-4 h-4 " /> Ajouter un symptôme
       </Button>
 
-      {/* Formulaire des symptômes */}
+      {/* Formulaire */}
       <div className="space-y-6">
         {symptoms.map((sym, index) => (
           <Card key={index} className="shadow-sm">
@@ -144,15 +249,37 @@ const AddMessage = () => {
               <CardTitle>Symptôme {index + 1}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
-              {Object.keys(sym).map((key) => (
-                <div key={key} className="space-y-1">
-                  <Label className="capitalize">{key}</Label>
-                  <Input
-                    value={sym[key as keyof Symptom]}
-                    onChange={(e: any) =>
-                      updateSymptom(index, key as keyof Symptom, e.target.value)
-                    }
-                  />
+              {fields.map((f) => (
+                <div key={f.key} className="space-y-1">
+                  <Label>{f.labelAdmin}</Label>
+                  <p className="text-xs text-gray-500 italic">{f.question}</p>
+
+                  {f.options ? (
+                    <Select
+                      value={sym[f.key]}
+                      onValueChange={(value) =>
+                        updateSymptom(index, f.key, value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {f.options.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      value={sym[f.key]}
+                      onChange={(e) =>
+                        updateSymptom(index, f.key, e.target.value)
+                      }
+                    />
+                  )}
                 </div>
               ))}
             </CardContent>

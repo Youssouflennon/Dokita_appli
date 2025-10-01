@@ -9,6 +9,7 @@ interface UserFilters {
   reservationId?: string;
   page?: number;
   limit?: number;
+  q?: string;
 }
 
 interface AllOrdonnancesState {
@@ -40,6 +41,7 @@ const useStoreAllOrdonnances = create<AllOrdonnancesState>((set, get) => ({
         params.append("reservationId", filters.reservationId);
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.q) params.append("q", filters.q);
     }
 
     try {
@@ -51,8 +53,8 @@ const useStoreAllOrdonnances = create<AllOrdonnancesState>((set, get) => ({
       );
       console.log("response", response.data);
       set({
-        AllOrdonnances: response.data,
-        //count: response.data.meta.total,
+        AllOrdonnances: response.data.items,
+        count: response.data.meta.total,
         loadingAllOrdonnances: false,
       });
     } catch (error) {

@@ -10,6 +10,7 @@ interface VideoFilters {
   date?: string; // ISO ou format attendu par ton backend
   page?: number;
   limit?: number;
+  q?: string;
 }
 
 interface AbonnementsState {
@@ -26,8 +27,6 @@ const useStoreAbonnements = create<AbonnementsState>((set) => ({
 
   fetchAbonnements: async (filters?: VideoFilters) => {
     const token = localStorage.getItem("token");
-
-
 
     if (!token) {
       console.error("No token available. User might not be authenticated.");
@@ -47,6 +46,7 @@ const useStoreAbonnements = create<AbonnementsState>((set) => ({
       if (filters.date) params.append("date", filters.date);
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.q) params.append("q", filters.q);
     }
 
     try {

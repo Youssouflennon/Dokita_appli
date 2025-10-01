@@ -132,7 +132,7 @@ const Home = () => {
                   className="flex items-center justify-between mb-3"
                 >
                   <div className="flex items-center gap-3">
-                    {!t?.medecin?.profile ? (
+                    {t?.medecin?.profile ? (
                       <img
                         src={t?.medecin?.profile}
                         alt={`${t?.medecin?.firstName} ${t?.medecin?.lastName}`}

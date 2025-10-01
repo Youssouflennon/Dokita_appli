@@ -67,6 +67,9 @@ export default function FormationCont() {
   const [date, setDate] = useState("");
   const [statut, setStatut] = useState("");
 
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
@@ -77,8 +80,18 @@ export default function FormationCont() {
   console.log("AllFormation", AllFormation);
 
   useEffect(() => {
-    fetchAllFormation({ page, limit: 6 });
-  }, [page, fetchAllFormation]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchAllFormation({ page, limit: 6, search: debouncedSearch });
+  }, [page, debouncedSearch, fetchAllFormation]);
 
   if (loadingAllFormation) {
     return <TotalLoad />;
@@ -102,6 +115,8 @@ export default function FormationCont() {
           <input
             type="text"
             placeholder="Rechercher"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />

@@ -68,12 +68,25 @@ export default function DoctorTable() {
     useStoreAllUsers();
   const [page, setPage] = useState(1);
 
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
   console.log("AllUsers", AllUsers);
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
     fetchOverview();
-    fetchAllUsers({ userType: "MEDECIN", page, limit: 7 });
-  }, [page, fetchOverview, fetchAllUsers]);
+    fetchAllUsers({ userType: "MEDECIN", page, limit: 7, q: debouncedSearch });
+  }, [page, debouncedSearch, fetchOverview, fetchAllUsers]);
 
   if (loadingAllUsers) {
     return <TotalLoad />;
@@ -126,6 +139,8 @@ export default function DoctorTable() {
           <input
             type="text"
             placeholder="Rechercher"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
@@ -260,7 +275,7 @@ export default function DoctorTable() {
               <TableCell className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src="https://i.pravatar.cc/40?img=3"
+                    src={a.profile}
                     alt="Avatar"
                   />
                   <AvatarFallback>NM</AvatarFallback>
@@ -291,7 +306,7 @@ export default function DoctorTable() {
                     <ul className="space-y-2 cursor-pointer">
                       <li
                         className="flex items-center gap-2 p-2 border-b last:border-none"
-                 
+
                         // navigate(0);
                       >
                         <FaEdit

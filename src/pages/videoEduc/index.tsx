@@ -66,24 +66,30 @@ export default function Video() {
   const [adresse, setAdresse] = useState("");
   const [date, setDate] = useState("");
   const [statut, setStatut] = useState("");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
 
   const { Videos, loadingVideos, fetchVideos, count } = useStoreVideos();
-
-  const handleSearch = (e: string) => {
-    setSearch(e);
-    setPage(1);
-  };
 
   console.log("Videos", Videos);
 
   useEffect(() => {
-    fetchVideos({ page, limit: 7 });
-  }, [page, fetchVideos]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchVideos({ page, limit: 6, q: debouncedSearch });
+  }, [page, debouncedSearch, fetchVideos]);
 
   if (loadingVideos) {
     return <TotalLoad />;
@@ -139,6 +145,8 @@ export default function Video() {
           <input
             type="text"
             placeholder="Rechercher"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />

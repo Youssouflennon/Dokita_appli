@@ -100,7 +100,7 @@ const SideBar = () => {
       subItems: [],
     },
     {
-      name: "Message structurés",
+      name: "Fiche structurées",
       pathname: "/message_structure",
       icon: <FaFileAlt />,
       subItems: [],
@@ -109,7 +109,10 @@ const SideBar = () => {
       name: "Formation Continue",
       pathname: "/formation",
       icon: <FaChalkboardTeacher />,
-      subItems: [],
+      subItems: [
+        { name: t("Formation"), pathname: "/formation" },
+        { name: t("Categorie"), pathname: "/categorie" },
+      ],
     },
 
     {
@@ -117,8 +120,8 @@ const SideBar = () => {
       pathname: "/ordonnance",
       icon: <FaPrescriptionBottleAlt />,
       subItems: [
-        { name: t("ordonnance_medical"), pathname: "/ordonnance" },
-        { name: t("ordonnance_patient"), pathname: "/listRole" },
+        { name: t("medicament"), pathname: "/ordonnance" },
+        { name: t("maladie"), pathname: "/listRole" },
       ],
     },
 

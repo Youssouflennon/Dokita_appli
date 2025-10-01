@@ -497,7 +497,7 @@ const DetailDoctor = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {OneUser?.abonnementsM.map((d: any, i: any) => (
+              {OneUser?.abonnementsM?.map((d: any, i: any) => (
                 <TableRow
                   key={i}
                   className="cursor-pointer"

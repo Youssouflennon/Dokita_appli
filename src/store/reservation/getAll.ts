@@ -10,6 +10,7 @@ interface UserFilters {
   limit?: number;
   medecinId?: number;
   patientId?: number;
+  q?: string;
 }
 
 interface AllReservationState {
@@ -41,6 +42,7 @@ const useStoreAllReservation = create<AllReservationState>((set, get) => ({
       if (filters.limit) params.append("limit", String(filters.limit));
       if (filters.medecinId) params.append("page", String(filters.medecinId));
       if (filters.patientId) params.append("limit", String(filters.patientId));
+      if (filters.q) params.append("q", filters.q);
     }
 
     try {

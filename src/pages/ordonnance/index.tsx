@@ -54,6 +54,7 @@ import {
   SelectValue,
 } from "../../components/components/ui/select";
 import useStoreAllOrdonnances from "src/store/ordonnance/getAll";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function Ordannance() {
   const [isChecked, setIsChecked] = useState(false);
@@ -69,12 +70,26 @@ export default function Ordannance() {
 
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
   const { AllOrdonnances, loadingAllOrdonnances, fetchAllOrdonnances, count } =
     useStoreAllOrdonnances();
 
   useEffect(() => {
-    fetchAllOrdonnances();
-  }, [fetchAllOrdonnances]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchAllOrdonnances({ page, limit: 5, q: debouncedSearch });
+  }, [page, debouncedSearch, fetchAllOrdonnances]);
 
   if (loadingAllOrdonnances) {
     return <TotalLoad />;
@@ -131,6 +146,8 @@ export default function Ordannance() {
           <input
             type="text"
             placeholder="Rechercher"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
@@ -334,44 +351,18 @@ export default function Ordannance() {
           ))}
         </TableBody>
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 

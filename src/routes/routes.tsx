@@ -25,6 +25,8 @@ import Ordannance from "src/pages/ordonnance";
 import AddOrdonnance from "src/pages/ordonnance/add";
 import Video from "src/pages/videoEduc";
 import AddVideo from "src/pages/videoEduc/add";
+import AddCategorie from "src/pages/categorie/add";
+import Categorie from "src/pages/categorie";
 
 interface RouteType {
   path: string;
@@ -131,6 +133,26 @@ const routes: RouteType[] = [
       </ProtectedRoute>
     ),
     children: [{ path: "/message_structure", element: <MessageStruct /> }],
+  },
+
+  {
+    path: "/add_categorie",
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [{ path: "/add_categorie", element: <AddCategorie /> }],
+  },
+
+  {
+    path: "/categorie",
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [{ path: "/categorie", element: <Categorie /> }],
   },
 
   {

@@ -7,6 +7,7 @@ interface UserFilters {
   categoryId?: string;
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 interface AllFormationState {
@@ -35,6 +36,7 @@ const useStoreAllFormation = create<AllFormationState>((set, get) => ({
       if (filters.categoryId) params.append("categoryId", filters.categoryId);
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.search) params.append("search", filters.search);
     }
 
     try {
