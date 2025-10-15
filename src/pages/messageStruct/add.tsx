@@ -56,7 +56,7 @@ const fields: SymptomField[] = [
   {
     key: "intensite",
     labelAdmin: "Intensité (À quel point c’est fort ?)",
-    question: "À quel point c’est fort ?",
+    question: "À quel point c’est fort ?", 
     options: ["Pas fort (1–3)", "Moyennement fort (4–6)", "Très fort (7–10)"],
   },
   {

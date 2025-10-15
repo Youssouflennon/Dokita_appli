@@ -27,6 +27,7 @@ import {
   ChevronRight,
   MoreHorizontal,
   PlusCircle,
+  CalendarIcon,
 } from "lucide-react";
 import { Input } from "../../components/components/ui/input";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
@@ -54,16 +55,30 @@ import {
 } from "../../components/components/ui/select";
 import useStoreAllReservation from "src/store/reservation/getAll";
 import Pagination from "../../components/components/ui/pagination";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormControl,
+} from "../../components/components/ui/form";
+import { Calendar } from "../../components/components/ui/calendar";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "../../components/lib/utils";
+
+type FilterFormValues = {
+  date?: Date;
+};
 
 export default function RendezVous() {
+  const form = useForm<FilterFormValues>({
+    defaultValues: { date: undefined },
+  });
   const [isChecked, setIsChecked] = useState(false);
   const [isSwitched, setIsSwitched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [detailCard, setDetailCard] = useState(false);
-
-  const [adresse, setAdresse] = useState("");
-  const [date, setDate] = useState("");
-  const [statut, setStatut] = useState("");
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -88,7 +103,11 @@ export default function RendezVous() {
   }, [search]);
 
   useEffect(() => {
-    fetchAllReservation({ page, limit: 6, q: debouncedSearch });
+    fetchAllReservation({
+      page,
+      limit: 6,
+      q: debouncedSearch,
+    });
   }, [page, debouncedSearch, fetchAllReservation]);
 
   if (loadingAllReservation) {
@@ -151,13 +170,13 @@ export default function RendezVous() {
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
         </div>{" "}
         <div className="space-x-2">
-          <Button variant="outline" size="sm">
+          {/*    <Button variant="outline" size="sm">
             <img
               src="/Iconfleche.svg"
               // alt="Avatar"
               className="h-6 w-6 rounded-full"
             />
-          </Button>
+          </Button> */}
 
           {/*    <Button variant="outline" size="sm">
               <img
@@ -175,69 +194,94 @@ export default function RendezVous() {
                 className="h-6 w-6 rounded-full"
               />{" "}
             </PopoverTrigger>
-            <PopoverContent className="">
+            <PopoverContent className="w-64">
               <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
-
-                {/* Adresse */}
-                <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
-
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
+                <Form {...form}>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      // 👉 Quand on clique sur "Réinitialiser"
+                      form.reset(); // vide la date
+                      fetchAllReservation({
+                        page: 1,
+                        limit: 6,
+                        q: debouncedSearch,
+                        date: undefined,
+                      });
+                      setPage(1);
                     }}
-                    className="rounded-full"
                   >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
-                </div>
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <Label>Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {field.value
+                                    ? format(field.value, "dd MMMM yyyy", {
+                                        locale: fr,
+                                      })
+                                    : "Choisir une date"}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                locale={fr}
+                                onSelect={(date) => {
+                                  // ✅ On met à jour la valeur du formulaire
+                                  field.onChange(date);
+
+                                  // ✅ Et on lance automatiquement la requête
+                                  const formattedDate = date
+                                    ? date.toISOString().split("T")[0]
+                                    : undefined;
+
+                                  fetchAllReservation({
+                                    page: 1,
+                                    limit: 6,
+                                    q: debouncedSearch,
+                                    date: formattedDate,
+                                  });
+                                  setPage(1);
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        type="submit"
+                        className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white"
+                      >
+                        Réinitialiser
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </div>
             </PopoverContent>
           </Popover>
@@ -266,7 +310,6 @@ export default function RendezVous() {
 
         <TableBody>
           {AllReservation?.map((a, i) => (
-            
             <TableRow
               key={i}
               className="hover:bg-gray-50 transition-colors cursor-pointer"
@@ -286,10 +329,7 @@ export default function RendezVous() {
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage
-                    src={a.medecin.profile}
-                    alt="Avatar"
-                    />
+                    <AvatarImage src={a.medecin.profile} alt="Avatar" />
                     <AvatarFallback>NM</AvatarFallback>
                   </Avatar>
                   <span className="font-medium">
@@ -302,10 +342,7 @@ export default function RendezVous() {
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage
-                    src={a.patient.profile}
-                    alt="Avatar"
-                    />
+                    <AvatarImage src={a.patient.profile} alt="Avatar" />
                     <AvatarFallback>NM</AvatarFallback>
                   </Avatar>
                   <span className="font-medium">{a.patientName}</span>

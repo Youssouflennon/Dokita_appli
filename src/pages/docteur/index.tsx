@@ -274,13 +274,13 @@ export default function DoctorTable() {
               </TableCell>
               <TableCell className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={a.profile}
-                    alt="Avatar"
-                  />
+                  <AvatarImage src={a.profile} alt="Avatar" />
                   <AvatarFallback>NM</AvatarFallback>
                 </Avatar>
-                <span className="font-medium">{a.firstName}</span>
+                <span className="font-medium">
+                  {" "}
+                  {a.firstName} {a.lastName}
+                </span>
               </TableCell>
               <TableCell className="text-blue-600 underline">
                 {a.email}

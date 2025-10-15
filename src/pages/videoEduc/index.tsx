@@ -27,6 +27,7 @@ import {
   ChevronRight,
   MoreHorizontal,
   PlusCircle,
+  CalendarIcon,
 } from "lucide-react";
 import { Input } from "../../components/components/ui/input";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
@@ -56,8 +57,26 @@ import {
 import useStoreVideos from "src/store/video/getAll";
 import dayjs from "dayjs";
 import Pagination from "../../components/components/ui/pagination";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormControl,
+} from "../../components/components/ui/form";
+import { Calendar } from "../../components/components/ui/calendar";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "../../components/lib/utils";
+import { useForm } from "react-hook-form";
+
+type FilterFormValues = {
+  date?: Date;
+};
 
 export default function Video() {
+  const form = useForm<FilterFormValues>({
+    defaultValues: { date: undefined },
+  });
   const [isChecked, setIsChecked] = useState(false);
   const [isSwitched, setIsSwitched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -176,69 +195,94 @@ export default function Video() {
                 className="h-6 w-6 rounded-full"
               />{" "}
             </PopoverTrigger>
-            <PopoverContent className="">
+            <PopoverContent className="w-64">
               <div className="p-4 space-y-4">
                 <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Filtre
                 </h2>
-
-                {/* Adresse */}
-                <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
-
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
+                <Form {...form}>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      // 👉 Quand on clique sur "Réinitialiser"
+                      form.reset(); // vide la date
+                      fetchVideos({
+                        page: 1,
+                        limit: 6,
+                        q: debouncedSearch,
+                        date: undefined,
+                      });
+                      setPage(1);
                     }}
-                    className="rounded-full"
                   >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
-                </div>
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <Label>Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {field.value
+                                    ? format(field.value, "dd MMMM yyyy", {
+                                        locale: fr,
+                                      })
+                                    : "Choisir une date"}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                locale={fr}
+                                onSelect={(date) => {
+                                  // ✅ On met à jour la valeur du formulaire
+                                  field.onChange(date);
+
+                                  // ✅ Et on lance automatiquement la requête
+                                  const formattedDate = date
+                                    ? date.toISOString().split("T")[0]
+                                    : undefined;
+
+                                  fetchVideos({
+                                    page: 1,
+                                    limit: 6,
+                                    q: debouncedSearch,
+                                    date: formattedDate,
+                                  });
+                                  setPage(1);
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        type="submit"
+                        className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white"
+                      >
+                        Réinitialiser
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </div>
             </PopoverContent>
           </Popover>
@@ -257,7 +301,6 @@ export default function Video() {
             </TableHead>
             <TableHead>Nom de vidéos</TableHead>
             <TableHead>Catégorie</TableHead>
-            <TableHead>Durée (minutes)</TableHead>
             <TableHead>Date de creation</TableHead>
             <TableHead></TableHead>
           </TableRow>
@@ -282,7 +325,6 @@ export default function Video() {
                 {a.title}
               </TableCell>
               <TableCell className="text-blue-600">{a.category}</TableCell>
-              <TableCell>12</TableCell>
               <TableCell>
                 {" "}
                 {dayjs(a.createdAt).format("DD/MM/YYYY HH:mm")}

@@ -41,9 +41,14 @@ const SignIn = () => {
 
   const onSubmit = async (data: SignInFormValues) => {
     try {
-      const response = await loginUser(data); // ici le backend reçoit { phone, password }
+      // S'assurer que le numéro commence par +237
+      const formattedData = {
+        ...data,
+        phone: data.phone.startsWith("+237") ? data.phone : `+237${data.phone}`,
+      };
+
+      const response = await loginUser(formattedData);
       if (response?.token) {
-        // Stockage local
         localStorage.setItem("user", JSON.stringify(response.user));
         localStorage.setItem("token", response.token);
 
@@ -97,9 +102,9 @@ const SignIn = () => {
             <img
               src="/logo.png"
               alt="Avatar"
-              className="w-12 h-12 flex items-center"
+              className="w-14 h-14 flex items-center"
             />
-            <h1 className="text-3xl font-bold text-gray-800">Dokita</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Dokita</h1>
           </div>
 
           <Form {...form}>
@@ -109,15 +114,23 @@ const SignIn = () => {
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-100">
                     <Label htmlFor="phone">Téléphone</Label>
-                    <FormControl>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="Entrez votre numéro de téléphone"
-                        {...field}
-                      />
+                    <FormControl className="w-full">
+                      <div className="flex w-full">
+                        {/* Préfixe fixe */}
+                        <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
+                          +237
+                        </span>
+                        {/* Input prend tout le reste */}
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="699123456"
+                          {...field}
+                          className="flex-1 min-w-0 rounded-l-none bg-white"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,6 +151,7 @@ const SignIn = () => {
                           type={showPassword ? "text" : "password"}
                           placeholder="Entrez votre mot de passe"
                           {...field}
+                          className="bg-white"
                         />
                         <button
                           type="button"

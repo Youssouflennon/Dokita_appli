@@ -184,7 +184,7 @@ export default function Ordannance() {
                 </h2>
 
                 {/* Adresse */}
-                <div className="space-y-1">
+                {/*    <div className="space-y-1">
                   <Label htmlFor="adresse">Adresse</Label>
                   <Select value={adresse} onValueChange={setAdresse}>
                     <SelectTrigger className="w-full">
@@ -195,7 +195,7 @@ export default function Ordannance() {
                       <SelectItem value="adresse2">Adresse 2</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                </div> */}
 
                 {/* Date */}
                 <div className="space-y-1">

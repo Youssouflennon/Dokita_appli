@@ -86,17 +86,34 @@ const AddFormation = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // ⚡️ On prépare le FormData pour l'upload du fichier
+      // Validation locale rapide avant d’envoyer
+      if (
+        !data.name.trim() ||
+        !data.competence.trim() ||
+        data.dureeHeures < 1
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Champs invalides",
+          description:
+            "Veuillez remplir tous les champs obligatoires et entrer une durée valide.",
+        });
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("name", data.name);
+      formData.append("name", data.name.trim());
       formData.append("categoryId", String(data.categoryId));
-      formData.append("competence", data.competence);
-      formData.append("dureeHeures", String(data.dureeHeures));
-      formData.append("comment", data.comment);
+      formData.append("competence", data.competence.trim());
+      formData.append("dureeHeures", String(Math.floor(data.dureeHeures)));
+      formData.append("comment", data.comment?.trim() || "");
 
       data.lessons.forEach((lesson, index) => {
-        formData.append(`lessons[${index}][title]`, lesson.title);
-        formData.append(`lessons[${index}][description]`, lesson.description);
+        formData.append(`lessons[${index}][title]`, lesson.title.trim());
+        formData.append(
+          `lessons[${index}][description]`,
+          lesson.description.trim()
+        );
         formData.append(
           `lessons[${index}][orderIndex]`,
           String(lesson.orderIndex)
@@ -118,11 +135,14 @@ const AddFormation = () => {
         description:
           "Votre formation continue a été enregistrée avec succès 🚀",
       });
+
+      methods.reset(); // ✅ Réinitialise le formulaire après succès
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d’ajouter la formation",
+        description:
+          "Impossible d’ajouter la formation. Vérifiez les champs et réessayez.",
       });
     }
   };
