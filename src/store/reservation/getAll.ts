@@ -11,6 +11,7 @@ interface UserFilters {
   medecinId?: number;
   patientId?: number;
   q?: string;
+  date?: string; // ISO ou format attendu par ton backend
 }
 
 interface AllReservationState {
@@ -43,6 +44,7 @@ const useStoreAllReservation = create<AllReservationState>((set, get) => ({
       if (filters.medecinId) params.append("page", String(filters.medecinId));
       if (filters.patientId) params.append("limit", String(filters.patientId));
       if (filters.q) params.append("q", filters.q);
+      if (filters.date) params.append("date", filters.date);
     }
 
     try {

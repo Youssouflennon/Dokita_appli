@@ -276,7 +276,9 @@ export default function PatientsTable() {
                     <AvatarImage src={a.profile} alt="Avatar" />
                     <AvatarFallback>NM</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">{a.firstName}</span>
+                  <span className="font-medium">
+                    {a.firstName} {a.lastName}
+                  </span>
                 </TableCell>
                 <TableCell className="text-blue-600 underline">
                   {a.email}
