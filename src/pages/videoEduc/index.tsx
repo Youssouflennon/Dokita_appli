@@ -28,6 +28,7 @@ import {
   MoreHorizontal,
   PlusCircle,
   CalendarIcon,
+  ChevronDown,
 } from "lucide-react";
 import { Input } from "../../components/components/ui/input";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
@@ -160,7 +161,7 @@ export default function Video() {
       </Card>
 
       <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white">
-        <div className="relative">
+        <div className="relative flex gap-2 ">
           <input
             type="text"
             placeholder="Rechercher"
@@ -169,37 +170,19 @@ export default function Video() {
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
-        </div>{" "}
-        <div className="space-x-2">
-          <Button variant="outline" size="sm">
-            <img
-              src="/Iconfleche.svg"
-              // alt="Avatar"
-              className="h-6 w-6 rounded-full"
-            />
-          </Button>
-
-          {/*    <Button variant="outline" size="sm">
-              <img
-                src="/iconFil.svg"
-                // alt="Avatar"
-                className="h-6 w-6 rounded-full"
-              />{" "}
-            </Button> */}
 
           <Popover>
-            <PopoverTrigger className=" bg-white text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
+            <PopoverTrigger className="flex bg-gray-100 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100 gap-1">
               <img
                 src="/iconFil.svg"
                 // alt="Avatar"
                 className="h-6 w-6 rounded-full"
               />{" "}
+              <span>date</span>
+              <ChevronDown className="w-5 h-5 text-gray-600" />
             </PopoverTrigger>
             <PopoverContent className="w-64">
               <div className="p-4 space-y-4">
-                <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Filtre
-                </h2>
                 <Form {...form}>
                   <form
                     className="space-y-4"
@@ -272,21 +255,20 @@ export default function Video() {
                         </FormItem>
                       )}
                     />
-
-                    <div className="flex justify-end pt-2">
-                      <Button
-                        type="submit"
-                        className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white"
-                      >
-                        Réinitialiser
-                      </Button>
-                    </div>
                   </form>
                 </Form>
               </div>
             </PopoverContent>
           </Popover>
-        </div>
+        </div>{" "}
+        <button
+          className="rounded-full text-white bg-primary"
+          onClick={() => {
+            fetchVideos({ page, limit: 6, q: debouncedSearch });
+          }}
+        >
+          Annuler filtre
+        </button>
       </div>
 
       <Table className="bg-white">

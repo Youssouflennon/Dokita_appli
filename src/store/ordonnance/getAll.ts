@@ -10,6 +10,7 @@ interface UserFilters {
   page?: number;
   limit?: number;
   q?: string;
+  createdAt?: string; // ISO ou format attendu par ton backend
 }
 
 interface AllOrdonnancesState {
@@ -42,6 +43,7 @@ const useStoreAllOrdonnances = create<AllOrdonnancesState>((set, get) => ({
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
       if (filters.q) params.append("q", filters.q);
+      if (filters.createdAt) params.append("createdAt", filters.createdAt);
     }
 
     try {

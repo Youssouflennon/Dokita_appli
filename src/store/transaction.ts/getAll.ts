@@ -35,7 +35,7 @@ const useStoreAllTransactions = create<AllTransactionsState>((set, get) => ({
     const params = new URLSearchParams();
     if (filters) {
       if (filters.status) params.append("status", filters.status);
-      if (filters.type) params.append("status", filters.type);
+      if (filters.type) params.append("type", filters.type);
       if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
       if (filters.q) params.append("q", filters.q);
