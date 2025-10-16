@@ -16,7 +16,12 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/components/ui/card";
-import { CalendarIcon, MoreHorizontal, PlusCircle } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronDown,
+  MoreHorizontal,
+  PlusCircle,
+} from "lucide-react";
 import { FaEdit, FaSearch, FaTrash, FaUser } from "react-icons/fa";
 import {
   Popover,
@@ -139,7 +144,7 @@ export default function Abonnement() {
 
       {/* --- Barre de recherche + filtre --- */}
       <div className="flex items-center justify-between mb-5 border border-gray-200 p-2 bg-white">
-        <div className="relative">
+        <div className="relative flex gap-2 ">
           <input
             type="text"
             placeholder="Rechercher"
@@ -148,85 +153,84 @@ export default function Abonnement() {
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
+
+          <Popover>
+            <PopoverTrigger className="flex bg-gray-100 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100 gap-1">
+              <img
+                src="/iconFil.svg"
+                alt="Filtrer"
+                className="h-6 w-6 rounded-full"
+              />
+              <span>date</span>
+
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            </PopoverTrigger>
+
+            <PopoverContent className="w-64">
+              <div className="p-4 space-y-4">
+                <Form {...form}>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleApplyFilters();
+                    }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <Label>Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {field.value
+                                    ? format(field.value, "dd MMMM yyyy", {
+                                        locale: fr,
+                                      })
+                                    : "Choisir une date"}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                locale={fr}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormItem>
+                      )}
+                    />
+                  </form>
+                </Form>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <Popover>
-          <PopoverTrigger className="bg-white text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100">
-            <img
-              src="/iconFil.svg"
-              alt="Filtrer"
-              className="h-6 w-6 rounded-full"
-            />
-          </PopoverTrigger>
-
-          <PopoverContent className="w-64">
-            <div className="p-4 space-y-4">
-              <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                Filtre
-              </h2>
-
-              <Form {...form}>
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleApplyFilters();
-                  }}
-                >
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <Label>Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value
-                                  ? format(field.value, "dd MMMM yyyy", {
-                                      locale: fr,
-                                    })
-                                  : "Choisir une date"}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              locale={fr}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex justify-end pt-2">
-                    <Button
-                      type="submit"
-                      className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white"
-                      onClick={() => {
-                        fetchAbonnements();
-                      }}
-                    >
-                      Réinitialiser
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <button
+          className="rounded-full text-white bg-primary"
+          onClick={() => {
+            fetchAbonnements({ page, limit: 6, q: debouncedSearch });
+          }}
+        >
+          Annuler filtre
+        </button>
       </div>
 
       {/* --- Tableau --- */}

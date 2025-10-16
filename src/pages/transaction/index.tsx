@@ -1,4 +1,4 @@
-import { Banknote, PlusCircle, TrendingUp } from "lucide-react";
+import { Banknote, ChevronDown, PlusCircle, TrendingUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -42,9 +42,7 @@ const Transaction = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [detailCard, setDetailCard] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [adresse, setAdresse] = useState("");
-  const [date, setDate] = useState("");
-  const [statut, setStatut] = useState("");
+
   const [page, setPage] = useState(1);
 
   const [search, setSearch] = useState("");
@@ -115,7 +113,7 @@ const Transaction = () => {
       </div>
 
       <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white">
-        <div className="relative">
+        <div className="relative flex gap-2 ">
           <input
             type="text"
             placeholder="Rechercher"
@@ -124,99 +122,84 @@ const Transaction = () => {
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
-        </div>{" "}
-        <div className="space-x-2">
-          <Button variant="outline" size="sm">
-            <img
-              src="/Iconfleche.svg"
-              // alt="Avatar"
-              className="h-6 w-6 rounded-full"
-            />
-          </Button>
-
-          {/*    <Button variant="outline" size="sm">
-              <img
-                src="/iconFil.svg"
-                // alt="Avatar"
-                className="h-6 w-6 rounded-full"
-              />{" "}
-            </Button> */}
 
           <Popover>
-            <PopoverTrigger className=" bg-white text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
+            <PopoverTrigger className="flex bg-gray-100 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100 gap-1">
               <img
                 src="/iconFil.svg"
                 // alt="Avatar"
                 className="h-6 w-6 rounded-full"
               />{" "}
+              <span>Type abonnement</span>
+              <ChevronDown className="w-5 h-5 text-gray-600" />
             </PopoverTrigger>
             <PopoverContent className="">
               <div className="p-4 space-y-4">
-                <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Filtre
-                </h2>
-
-                {/* Adresse */}
+                {/* Type */}
                 <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
-
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
-                    }}
-                    className="rounded-full"
+                  <Select
+                    onValueChange={(value) =>
+                      fetchAllTransactions({
+                        type: value as "RESERVATION" | "ABONNEMENT",
+                      })
+                    }
                   >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner un type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RESERVATION">RESERVATION</SelectItem>
+                      <SelectItem value="ABONNEMENT">ABONNEMENT</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </PopoverContent>
           </Popover>
-        </div>
+
+          <Popover>
+            <PopoverTrigger className="flex bg-gray-100 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100 gap-1">
+              <img
+                src="/iconFil.svg"
+                // alt="Avatar"
+                className="h-6 w-6 rounded-full"
+              />{" "}
+              <span>Statut</span>
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            </PopoverTrigger>
+            <PopoverContent className="">
+              <div className="p-4 space-y-4">
+                {/* Type */}
+                <div className="space-y-1">
+                  <Select
+                    onValueChange={(value) =>
+                      fetchAllTransactions({
+                        status: value as "PENDING" | "PAID" | "CANCELLED",
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner le statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">PENDING</SelectItem>
+                      <SelectItem value="PAID">PAID</SelectItem>
+                      <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>{" "}
+        <button
+          className="rounded-full text-white bg-primary"
+          onClick={() => {
+            fetchAllTransactions({ page, limit: 6, q: debouncedSearch });
+          }}
+        >
+          Annuler filtre
+        </button>
       </div>
 
       <Table className="bg-white">
@@ -235,7 +218,6 @@ const Transaction = () => {
             <TableHead>Date de Transaction</TableHead>
             <TableHead>Heure</TableHead>
             <TableHead>Montant</TableHead>
-            <TableHead>Mode</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -265,7 +247,21 @@ const Transaction = () => {
                 </TableCell>
 
                 {/* Type */}
-                <TableCell>{a.type}</TableCell>
+                <TableCell>
+                  {" "}
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium
+      ${
+        a.type === "ABONNEMENT"
+          ? "bg-blue-200 text-blue-700"
+          : a.type === "RESERVATION"
+          ? "bg-yellow-200 text-yellow-700"
+          : "bg-gray-200 text-gray-700"
+      }`}
+                  >
+                    {a.type}
+                  </span>
+                </TableCell>
 
                 {/* Date */}
                 <TableCell>
@@ -287,17 +283,20 @@ const Transaction = () => {
                 </TableCell>
 
                 {/* Mode */}
-                <TableCell>Orange Money</TableCell>
 
                 {/* Statut */}
                 <TableCell>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium 
-                ${
-                  a.status === "PAID"
-                    ? "bg-green-200 text-green-700"
-                    : "bg-yellow-200 text-yellow-700"
-                }`}
+                    className={`px-3 py-1 rounded-full text-xs font-medium
+      ${
+        a.status === "PAID"
+          ? "bg-green-200 text-green-700"
+          : a.status === "PENDING"
+          ? "bg-yellow-200 text-yellow-700"
+          : a.status === "CANCELLED"
+          ? "bg-red-200 text-red-700"
+          : "bg-gray-200 text-gray-700"
+      }`}
                   >
                     {a.status}
                   </span>

@@ -23,9 +23,11 @@ import {
   AvatarImage,
 } from "../../components/components/ui/avatar";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
+  CalendarIcon,
   PlusCircle,
 } from "lucide-react";
 import { Input } from "../../components/components/ui/input";
@@ -55,8 +57,26 @@ import {
 } from "../../components/components/ui/select";
 import useStoreAllOrdonnances from "src/store/ordonnance/getAll";
 import Pagination from "../../components/components/ui/pagination";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormControl,
+} from "../../components/components/ui/form";
+import { Calendar } from "../../components/components/ui/calendar";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "../../components/lib/utils";
+
+type FilterFormValues = {
+  createdAt?: Date;
+};
 
 export default function Ordannance() {
+  const form = useForm<FilterFormValues>({
+    defaultValues: { createdAt: undefined },
+  });
   const [isChecked, setIsChecked] = useState(false);
   const [isSwitched, setIsSwitched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -116,10 +136,7 @@ export default function Ordannance() {
               <div>
                 <p className="text-lg">Nombre total d'ordonnances</p>
 
-                <p className="text-2xl font-bold">
-                  1,822{" "}
-                  <span className="text-green-500 text-sm ml-1">+5.2%</span>
-                </p>
+                <p className="text-2xl font-bold">{AllOrdonnances?.length}</p>
               </div>
             </div>{" "}
           </CardTitle>
@@ -142,7 +159,7 @@ export default function Ordannance() {
       </Card>
 
       <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white">
-        <div className="relative">
+        <div className="relative flex gap-2 ">
           <input
             type="text"
             placeholder="Rechercher"
@@ -151,99 +168,105 @@ export default function Ordannance() {
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
-        </div>{" "}
-        <div className="space-x-2">
-          <Button variant="outline" size="sm">
-            <img
-              src="/Iconfleche.svg"
-              // alt="Avatar"
-              className="h-6 w-6 rounded-full"
-            />
-          </Button>
-
-          {/*    <Button variant="outline" size="sm">
-              <img
-                src="/iconFil.svg"
-                // alt="Avatar"
-                className="h-6 w-6 rounded-full"
-              />{" "}
-            </Button> */}
 
           <Popover>
-            <PopoverTrigger className=" bg-white text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
+            <PopoverTrigger className="flex bg-gray-100 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100 gap-1">
               <img
                 src="/iconFil.svg"
                 // alt="Avatar"
                 className="h-6 w-6 rounded-full"
               />{" "}
+              <span>date création</span>
+              <ChevronDown className="w-5 h-5 text-gray-600" />
             </PopoverTrigger>
-            <PopoverContent className="">
+            <PopoverContent className="w-64">
               <div className="p-4 space-y-4">
-                <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Filtre
-                </h2>
-
-                {/* Adresse */}
-                {/*    <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div> */}
-
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
-
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
+                <Form {...form}>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      // 👉 Quand on clique sur "Réinitialiser"
+                      form.reset(); // vide la date
+                      fetchAllOrdonnances({
+                        page: 1,
+                        limit: 6,
+                        q: debouncedSearch,
+                        createdAt: undefined,
+                      });
+                      setPage(1);
                     }}
-                    className="rounded-full"
                   >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
-                </div>
+                    <FormField
+                      control={form.control}
+                      name="createdAt"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <Label>Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {field.value
+                                    ? format(field.value, "dd MMMM yyyy", {
+                                        locale: fr,
+                                      })
+                                    : "Choisir une date"}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                locale={fr}
+                                onSelect={(date) => {
+                                  // ✅ On met à jour la valeur du formulaire
+                                  field.onChange(date);
+
+                                  // ✅ Et on lance automatiquement la requête
+                                  const formattedDate = date
+                                    ? date.toISOString().split("T")[0]
+                                    : undefined;
+
+                                  fetchAllOrdonnances({
+                                    page: 1,
+                                    limit: 6,
+                                    q: debouncedSearch,
+                                    createdAt: formattedDate,
+                                  });
+                                  setPage(1);
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormItem>
+                      )}
+                    />
+                  </form>
+                </Form>
               </div>
             </PopoverContent>
           </Popover>
-        </div>
+        </div>{" "}
+        <button
+          className="rounded-full text-white bg-primary"
+          onClick={() => {
+            fetchAllOrdonnances({ page, limit: 6, q: debouncedSearch });
+          }}
+        >
+          Annuler filtre
+        </button>
       </div>
 
       <Table className="bg-white">
@@ -287,14 +310,12 @@ export default function Ordannance() {
               <TableCell className="text-blue-600">MEXT</TableCell>
               <TableCell>{a.comment}</TableCell>
               <TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    {a.traitement?.map((t: string, index: number) => (
-                      <span key={index}>{t}</span>
-                    ))}
-                  </div>
-                </TableCell>
-              </TableCell>{" "}
+                <div className="flex flex-col">
+                  {a.traitement?.map((t: string, index: number) => (
+                    <span key={index}>{t}</span>
+                  ))}
+                </div>
+              </TableCell>
               <TableCell>Orale</TableCell>
               <TableCell>{a.dureeTraitement}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
