@@ -77,11 +77,11 @@ const Transaction = () => {
 
   return (
     <div className="flex flex-col gap-3 bg-gray-100 p-6 mt-3  h-screen">
-      <div className="flex justify-end">
+      {/*    <div className="flex justify-end">
         <div className="flex items-center gap-2 bg-primary p-2 rounded-full my-3 cursor-pointer text-white">
           <PlusCircle className="w-4 h-4" /> Ajouter une transaction
         </div>
-      </div>
+      </div> */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Nombres de Transactions"
@@ -112,7 +112,7 @@ const Transaction = () => {
         />
       </div>
 
-      <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white">
+      <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white mt-20">
         <div className="relative flex gap-2 ">
           <input
             type="text"

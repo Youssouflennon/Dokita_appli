@@ -117,11 +117,11 @@ export default function RendezVous() {
 
   return (
     <div className="flex flex-col p-4 h-full">
-      <div className="flex justify-end">
+      {/*     <div className="flex justify-end">
         <div className="flex items-center gap-2 bg-primary p-2 rounded-full my-3 cursor-pointer text-white">
           <PlusCircle className="w-4 h-4" /> Ajouter un Rendez-vous
         </div>
-      </div>
+      </div> */}
 
       <Card className="mb-6">
         <CardHeader>
