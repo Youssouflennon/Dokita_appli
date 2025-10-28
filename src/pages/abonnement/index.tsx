@@ -106,11 +106,11 @@ export default function Abonnement() {
 
   return (
     <div className="flex flex-col p-4 h-full">
-      <div className="flex justify-end">
+      {/*   <div className="flex justify-end">
         <div className="flex bg-primary p-2 rounded-full my-3 items-center gap-2 cursor-pointer text-white">
           <PlusCircle className="w-4 h-4" /> Ajouter un abonnement
         </div>
-      </div>
+      </div> */}
 
       {/* --- Statistiques --- */}
       <Card className="mb-6">
