@@ -32,6 +32,7 @@ import {
 import { useToast } from "../../components/hooks/use-toast";
 import useAddessaddCategoriestore from "src/store/formation/Add";
 import useStoreCategories from "src/store/categorie/getAll";
+import { Navigate, useNavigate } from "react-router-dom";
 
 type Lesson = {
   title: string;
@@ -79,6 +80,7 @@ const AddFormation = () => {
   const { addFormation, loading } = useAddessaddCategoriestore();
   const { toast } = useToast();
   const { Categories, fetchCategories } = useStoreCategories();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -86,7 +88,7 @@ const AddFormation = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Validation locale rapide avant d’envoyer
+      // Validation locale rapide
       if (
         !data.name.trim() ||
         !data.competence.trim() ||
@@ -101,34 +103,39 @@ const AddFormation = () => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append("name", data.name.trim());
-      formData.append("categoryId", String(data.categoryId));
-      formData.append("competence", data.competence.trim());
-      formData.append("dureeHeures", String(Math.floor(data.dureeHeures)));
-      formData.append("comment", data.comment?.trim() || "");
+      // 🔸 Convertir les fichiers en base64 si présents
+      const convertToBase64 = (file: File): Promise<string> =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (error) => reject(error);
+        });
 
-      data.lessons.forEach((lesson, index) => {
-        formData.append(`lessons[${index}][title]`, lesson.title.trim());
-        formData.append(
-          `lessons[${index}][description]`,
-          lesson.description.trim()
-        );
-        formData.append(
-          `lessons[${index}][orderIndex]`,
-          String(lesson.orderIndex)
-        );
-        formData.append(
-          `lessons[${index}][categoryId]`,
-          String(lesson.categoryId)
-        );
+      const lessonsWithBase64 = await Promise.all(
+        data.lessons.map(async (lesson) => {
+          let fileContent = null;
 
-        if (lesson.fileUrl) {
-          formData.append(`lessons[${index}][fileUrl]`, lesson.fileUrl);
-        }
-      });
+          if (lesson.fileUrl instanceof File) {
+            fileContent = await convertToBase64(lesson.fileUrl);
+          } else if (typeof lesson.fileUrl === "string") {
+            // Si c’est déjà une URL (lien direct)
+            fileContent = lesson.fileUrl;
+          }
 
-      await addFormation(formData);
+          return {
+            ...lesson,
+            fileUrl: fileContent, // base64 ou URL
+          };
+        })
+      );
+
+      const payload = {
+        ...data,
+        lessons: lessonsWithBase64,
+      };
+
+      await addFormation(payload);
 
       toast({
         title: "Formation ajoutée ✅",
@@ -136,7 +143,9 @@ const AddFormation = () => {
           "Votre formation continue a été enregistrée avec succès 🚀",
       });
 
-      methods.reset(); // ✅ Réinitialise le formulaire après succès
+      navigate("/formation");
+
+      methods.reset();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -149,6 +158,14 @@ const AddFormation = () => {
 
   return (
     <div className="p-6">
+      <h1
+        className="text-xl font-semibold mb-4 cursor-pointer"
+        onClick={() => {
+          navigate(-1);
+        }}
+      >
+        ← retour
+      </h1>
       <Card>
         <CardHeader>
           <CardTitle>Nouvelle formation continue</CardTitle>

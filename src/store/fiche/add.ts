@@ -17,7 +17,7 @@ const usePaludismeFormStore = create<PaludismeFormState>((set) => ({
     set({ loading: true });
 
     try {
-      const response = await fetch(`${config.mintClient}paludisme/anamnese/`, {
+      const response = await fetch(`${config.mintClient}fiches`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
