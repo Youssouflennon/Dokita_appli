@@ -7,22 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/components/ui/table";
-import { Badge } from "../../components/components/ui/badge";
-import { Switch } from "../../components/components/ui/switch";
-import { Button } from "../../components/components/ui/button";
-import { Checkbox } from "../../components/components/ui/checkbox";
+
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../components/components/ui/avatar";
-import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
@@ -40,13 +27,10 @@ import {
 } from "../../components/components/ui/popover";
 import { useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
-import DetailAbonnement from "./detailFormation";
 import TMModal from "../../components/components/ui/TM_Modal";
-import DetailRendez from "./detailFormation";
-import DetailMessage from "./detailFormation";
+
 import DetailFormation from "./detailFormation";
 import TotalLoad from "../../components/components/totalLoad";
-import { Label } from "../../components/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -56,19 +40,22 @@ import {
 } from "../../components/components/ui/select";
 import useStoreAllFormation from "src/store/formation/getAll";
 import Pagination from "../../components/components/ui/pagination";
+import useStoreCategories from "src/store/categorie/getAll";
 
 export default function FormationCont() {
   const [isChecked, setIsChecked] = useState(false);
-  const [isSwitched, setIsSwitched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [detailCard, setDetailCard] = useState(false);
 
-  const [adresse, setAdresse] = useState("");
-  const [date, setDate] = useState("");
-  const [statut, setStatut] = useState("");
-
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  const { Categories, loadingCategories, fetchCategories } =
+    useStoreCategories();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const navigate = useNavigate();
 
@@ -98,7 +85,7 @@ export default function FormationCont() {
   }
 
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="flex flex-col p-4 h-full mt-14">
       <div className="flex justify-end">
         <div
           className="flex items-center gap-2 bg-primary p-2 rounded-full my-3   text-white cursor-pointer"
@@ -110,8 +97,8 @@ export default function FormationCont() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white">
-        <div className="relative">
+      <div className="flex items-center justify-between mb-5 border border-gray-200 p-2 bg-white">
+        <div className="relative flex gap-2 ">
           <input
             type="text"
             placeholder="Rechercher"
@@ -120,99 +107,61 @@ export default function FormationCont() {
             className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
           />
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
-        </div>{" "}
-        <div className="space-x-2">
-          <Button variant="outline" size="sm">
-            <img
-              src="/Iconfleche.svg"
-              // alt="Avatar"
-              className="h-6 w-6 rounded-full"
-            />
-          </Button>
-
-          {/*    <Button variant="outline" size="sm">
-              <img
-                src="/iconFil.svg"
-                // alt="Avatar"
-                className="h-6 w-6 rounded-full"
-              />{" "}
-            </Button> */}
 
           <Popover>
-            <PopoverTrigger className=" bg-white text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
+            <PopoverTrigger className="flex bg-gray-100 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100 gap-1">
               <img
                 src="/iconFil.svg"
                 // alt="Avatar"
                 className="h-6 w-6 rounded-full"
               />{" "}
+              <span>Categories</span>
+              <ChevronDown className="w-5 h-5 text-gray-600" />
             </PopoverTrigger>
             <PopoverContent className="">
               <div className="p-4 space-y-4">
-                <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Filtre
-                </h2>
-
-                {/* Adresse */}
+                {/* Type */}
                 <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
-
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
+                  <Select
+                    onValueChange={(value) => {
+                      const selectedId: any = Number(value);
+                      fetchAllFormation({ categoryId: selectedId });
                     }}
-                    className="rounded-full"
                   >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner une catégorie" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {Categories?.length > 0 ? (
+                        Categories.map((cat: any) => (
+                          <SelectItem
+                            key={cat.categoryId}
+                            value={String(cat.categoryId)}
+                          >
+                            {cat.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled value="">
+                          Aucune catégorie disponible
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </PopoverContent>
           </Popover>
-        </div>
+        </div>{" "}
+        <button
+          className="rounded-full text-white bg-primary"
+          onClick={() => {
+            fetchAllFormation({ page, limit: 6, search: debouncedSearch });
+          }}
+        >
+          Annuler filtre
+        </button>
       </div>
 
       <Table className="bg-white">

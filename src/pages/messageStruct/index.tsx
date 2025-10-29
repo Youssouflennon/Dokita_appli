@@ -7,30 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/components/ui/table";
-import { Badge } from "../../components/components/ui/badge";
-import { Switch } from "../../components/components/ui/switch";
+
 import { Button } from "../../components/components/ui/button";
-import { Checkbox } from "../../components/components/ui/checkbox";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../components/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../components/components/ui/avatar";
-import {
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  PlusCircle,
-} from "lucide-react";
-import { Input } from "../../components/components/ui/input";
+
+import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { CustomCheckbox } from "../../components/components/ui/customcheck";
-import { CustomSwitch } from "../../components/components/ui/customswitch";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaSearch, FaTrash, FaUser } from "react-icons/fa";
 import {
@@ -40,47 +27,31 @@ import {
 } from "../../components/components/ui/popover";
 import { useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
-import DetailAbonnement from "./detailMessageStruct";
 import TMModal from "../../components/components/ui/TM_Modal";
-import DetailRendez from "./detailMessageStruct";
 import DetailMessage from "./detailMessageStruct";
 import TotalLoad from "../../components/components/totalLoad";
 import { Label } from "../../components/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/components/ui/select";
+
+import useStoreAllFiche from "src/store/fiche/getAll";
+import Pagination from "../../components/components/ui/pagination";
 
 export default function MessageStruct() {
   const [isChecked, setIsChecked] = useState(false);
-  const [isSwitched, setIsSwitched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [detailCard, setDetailCard] = useState(false);
 
-  const [adresse, setAdresse] = useState("");
-  const [date, setDate] = useState("");
-  const [statut, setStatut] = useState("");
+  const [page, setPage] = useState(1);
+
+  const { AllFiche, loadingAllFiche, fetchAllFiche, count } =
+    useStoreAllFiche();
+
+  useEffect(() => {
+    fetchAllFiche({ page, limit: 7 });
+  }, [page, fetchAllFiche]);
 
   const navigate = useNavigate();
 
-
-  
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simule un chargement pendant 3 secondes
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    // Nettoyage
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
+  if (loadingAllFiche) {
     return <TotalLoad />;
   }
 
@@ -129,109 +100,6 @@ export default function MessageStruct() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between mb-1 border border-gray-200 p-2 bg-white">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Rechercher"
-            className="pl-10 pr-4 py-1 rounded-md bg-white border border-gray-300 focus:outline-none"
-          />
-          <FaSearch className="absolute top-3 left-3 text-gray-400" />
-        </div>{" "}
-        <div className="space-x-2">
-          <Button variant="outline" size="sm">
-            <img
-              src="/Iconfleche.svg"
-              // alt="Avatar"
-              className="h-6 w-6 rounded-full"
-            />
-          </Button>
-
-          {/*    <Button variant="outline" size="sm">
-              <img
-                src="/iconFil.svg"
-                // alt="Avatar"
-                className="h-6 w-6 rounded-full"
-              />{" "}
-            </Button> */}
-
-          <Popover>
-            <PopoverTrigger className=" bg-white text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
-              <img
-                src="/iconFil.svg"
-                // alt="Avatar"
-                className="h-6 w-6 rounded-full"
-              />{" "}
-            </PopoverTrigger>
-            <PopoverContent className="">
-            <div className="p-4 space-y-4">
-                <h2 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Filtre
-                </h2>
-
-                {/* Adresse */}
-                <div className="space-y-1">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Select value={adresse} onValueChange={setAdresse}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une adresse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adresse1">Adresse 1</SelectItem>
-                      <SelectItem value="adresse2">Adresse 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date */}
-                <div className="space-y-1">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    id="date"
-                  />
-                </div>
-
-                {/* Statut */}
-                <div className="space-y-1">
-                  <Label htmlFor="statut">Statut</Label>
-                  <Select value={statut} onValueChange={setStatut}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="valide">Validé</SelectItem>
-                      <SelectItem value="en_cours">En cours</SelectItem>
-                      <SelectItem value="rejeté">Rejeté</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Boutons */}
-                <div className="flex justify-between pt-2 ">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdresse("");
-                      setDate("");
-                      setStatut("");
-                    }}
-                    className="rounded-full"
-                  >
-                    Réinitialiser
-                  </Button>
-                  <Button className="bg-[#1d3557] hover:bg-[#16314e] rounded-full text-white">
-                    Appliquer
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-
       <Table className="bg-white">
         <TableHeader>
           <TableRow>
@@ -240,134 +108,110 @@ export default function MessageStruct() {
                 label=""
                 checked={isChecked}
                 onChange={(e) => setIsChecked(e.target.checked)}
-              />{" "}
+              />
             </TableHead>
             <TableHead>Nom du formulaire</TableHead>
             <TableHead>Service</TableHead>
-            <TableHead>Heur de creation</TableHead>
-            <TableHead>Nombre de symptomes</TableHead>
+            <TableHead>Heure de création</TableHead>
+            <TableHead>Nombre de symptômes</TableHead>
             <TableHead>Date de création</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <TableRow
-              key={i}
-              //  className="cursor-pointer"
-              onClick={() => {
-                //  navigate("/detail_patient");
-              }}
-            >
-              <TableCell>
-                <CustomCheckbox
-                  label=""
-                  checked={isChecked}
-                  onChange={(e) => setIsChecked(e.target.checked)}
-                />{" "}
-              </TableCell>
-              <TableCell className="flex items-center gap-2">
-                Paludisme
-              </TableCell>
-              <TableCell className="text-blue-600">
-                Nettoyage des dents
-              </TableCell>
-              <TableCell>12:00</TableCell>
-              <TableCell>5</TableCell>
-              <TableCell>01/02/2024</TableCell>
+          {AllFiche?.map((fiche, i) => {
+            const createdDate = new Date(fiche.createdAt);
+            const heure = createdDate.toLocaleTimeString("fr-FR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            const date = createdDate.toLocaleDateString("fr-FR");
 
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <Popover>
-                  <PopoverTrigger className=" bg-gray-200 text-left px-4 py-1 text-sm  border rounded-md hover:bg-gray-100">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </PopoverTrigger>
-                  <PopoverContent className="p-4 w-full">
-                    <ul className="space-y-2 cursor-pointer">
-                      <li
-                        className="flex items-center gap-2 p-2 border-b last:border-none"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setDetailCard(true);
+            return (
+              <TableRow key={fiche.ficheId}>
+                <TableCell>
+                  <CustomCheckbox
+                    label=""
+                    checked={isChecked}
+                    onChange={(e) => setIsChecked(e.target.checked)}
+                  />
+                </TableCell>
 
-                          //  handleRowClick(item.id);
-                        }}
-                        // navigate(0);
-                      >
-                        <FaEdit
-                          className="text-gray-600 text-lg cursor-pointer"
+                {/* 🧾 Nom du formulaire */}
+                <TableCell className="flex items-center gap-2">
+                  {fiche.title}
+                </TableCell>
+
+                {/* 🏥 Service (placeholder si non dispo dans les données) */}
+                <TableCell className="text-blue-600">
+                  Médecine générale
+                </TableCell>
+
+                {/* 🕓 Heure de création */}
+                <TableCell>{heure}</TableCell>
+
+                {/* 💊 Nombre de symptômes */}
+                <TableCell>{fiche.questions?.length || 0}</TableCell>
+
+                {/* 📅 Date de création */}
+                <TableCell>{date}</TableCell>
+
+                {/* ⚙️ Actions */}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Popover>
+                    <PopoverTrigger className="bg-gray-200 text-left px-4 py-1 text-sm border rounded-md hover:bg-gray-100">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </PopoverTrigger>
+                    <PopoverContent className="p-4 w-full">
+                      <ul className="space-y-2 cursor-pointer">
+                        <li
+                          className="flex items-center gap-2 p-2 border-b last:border-none"
                           onClick={(event) => {
                             event.stopPropagation();
-                            setDetailCard(true);
-
-                            //  handleRowClick(item.id);
+                            console.log("🔍 Voir détail fiche", fiche.ficheId);
                           }}
-                        />
-                        <span className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200">
-                          Detail
-                        </span>
-                      </li>
+                        >
+                          <FaEdit className="text-gray-600 text-lg cursor-pointer" />
+                          <span className="font-medium text-gray-500 text-sm hover:text-gray-600 transition-colors duration-200">
+                            Détail
+                          </span>
+                        </li>
 
-                      <li
-                        className="flex items-center gap-2 p-2 border-b last:border-none"
-                        onClick={(event) => {
-                          event.stopPropagation();
-
-                          // setSelectedUser(item.id);
-                          setIsOpen(true);
-                        }}
-                        // navigate(0);
-                      >
-                        <FaTrash className="text-red-600 text-lg cursor-pointer" />
-                        <span className="font-medium text-red-500 text-sm hover:text-red-600 transition-colors duration-200">
-                          supprimer
-                        </span>
-                      </li>
-                    </ul>
-                  </PopoverContent>
-                </Popover>
-              </TableCell>
-            </TableRow>
-          ))}
+                        <li
+                          className="flex items-center gap-2 p-2 border-b last:border-none"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            console.log("🗑️ Supprimer fiche", fiche.ficheId);
+                          }}
+                        >
+                          <FaTrash className="text-red-600 text-lg cursor-pointer" />
+                          <span className="font-medium text-red-500 text-sm hover:text-red-600 transition-colors duration-200">
+                            Supprimer
+                          </span>
+                        </li>
+                      </ul>
+                    </PopoverContent>
+                  </Popover>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
+
         <TableFooter className="bg-white">
-          <tr>
-            <td colSpan={8}>
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 border-t border-gray-200 pt-4 gap-4">
-                {/* Infos de page */}
-                <p className="text-sm text-muted-foreground">Page 1 sur 34</p>
-
-                {/* Pagination */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {/* Précédent */}
-                  <Button variant="outline" size="lg" disabled>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-
-                  {/* Pages */}
-                  <Button variant="outline" size="icon">
-                    1
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    2
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    3
-                  </Button>
-                  <Button variant="outline" size="icon" disabled>
-                    …
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    34
-                  </Button>
-
-                  {/* Suivant */}
-                  <Button variant="outline" size="lg">
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="flex justify-center my-4">
+                <Pagination
+                  pages={Math.ceil((count || 1) / 7)}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  rangeLimit={5}
+                />
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
 
